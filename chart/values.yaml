@@ -1,0 +1,27 @@
+
+deployments:
+  - name: api
+    replicaCount: 1
+    image:
+      repository: nginx
+      tag: "latest"
+      pullPolicy: IfNotPresent
+  - name: consumer
+    replicaCount: 1
+    image:
+      repository: nginx
+      tag: "latest"
+      pullPolicy: IfNotPresent
+
+service:
+  deployment: api
+  type: ClusterIP
+  port: 80
+
+ingress:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  host: localhost
+  path: /api
+  servicePort: 80
+
