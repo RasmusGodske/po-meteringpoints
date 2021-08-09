@@ -3,13 +3,13 @@ deployments:
   - name: api
     replicaCount: 1
     image:
-      repository: nginx
+      repository: projectorigin/ett-meteringpoints-api
       tag: "latest"
       pullPolicy: IfNotPresent
   - name: consumer
     replicaCount: 1
     image:
-      repository: nginx
+      repository: projectorigin/ett-meteringpoints-consumer
       tag: "latest"
       pullPolicy: IfNotPresent
 
@@ -19,9 +19,7 @@ service:
   port: 80
 
 ingress:
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
   host: localhost
-  path: /api
+  path: /api/meteringpoints
   servicePort: 80
 
