@@ -1,0 +1,25 @@
+
+deployments:
+  - name: api
+    replicaCount: 1
+    image:
+      repository: projectorigin/ett-meteringpoints-api
+      tag: "latest"
+      pullPolicy: IfNotPresent
+  - name: consumer
+    replicaCount: 1
+    image:
+      repository: projectorigin/ett-meteringpoints-consumer
+      tag: "latest"
+      pullPolicy: IfNotPresent
+
+service:
+  deployment: api
+  type: ClusterIP
+  port: 80
+
+ingress:
+  host: localhost
+  path: /api/meteringpoints
+  servicePort: 80
+

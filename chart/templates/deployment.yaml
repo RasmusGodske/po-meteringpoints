@@ -1,0 +1,39 @@
+{{- range .Values.deployments}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ett-meteringpoints.fullname" $ }}-{{ .name }}
+  labels:
+    {{- include "ett-meteringpoints.labels" $ | nindent 4 }}
+    component: {{ .name }}
+spec:
+  replicas: {{ .replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ett-meteringpoints.selectorLabels" $ | nindent 6 }}
+      component: {{ .name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ett-meteringpoints.selectorLabels" $ | nindent 8 }}
+        component: {{ .name }}
+    spec:
+      containers:
+        - name: {{ $.Chart.Name }}-{{ .name }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+{{- end }}
+

@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "ett-meteringpoints.fullname" . }}
+  labels:
+    {{- include "ett-meteringpoints.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`{{ .Values.ingress.host }}`) && PathPrefix(`{{ .Values.ingress.path }}`)
+    kind: Rule
+    services:
+    - name: {{ include "ett-meteringpoints.fullname" . }}
+      port: {{ .Values.ingress.servicePort }}
