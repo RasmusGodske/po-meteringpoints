@@ -7,9 +7,12 @@ metadata:
 spec:
   entryPoints:
     - web
+    - websecure
   routes:
   - match: Host(`{{ .Values.ingress.host }}`) && PathPrefix(`{{ .Values.ingress.path }}`)
     kind: Rule
     services:
     - name: {{ include "ett-meteringpoints.fullname" . }}
       port: {{ .Values.ingress.servicePort }}
+    middlewares:
+      - name: ett-auth-service
