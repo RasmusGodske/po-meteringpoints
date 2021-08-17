@@ -23,6 +23,12 @@ spec:
         - name: {{ $.Chart.Name }}-{{ .name }}
           image: "{{ .image.repository }}:{{ .image.tag }}"
           imagePullPolicy: {{ .image.pullPolicy }}
+          {{- if .command }}
+          command: [{{ .command | quote }}]
+          {{- if .args }}
+          args: [{{ .args | quote }}]
+          {{- end}}
+          {{- end}}
           ports:
             - name: http
               containerPort: 80

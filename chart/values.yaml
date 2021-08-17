@@ -2,14 +2,18 @@
 deployments:
   - name: api
     replicaCount: 1
+    command: "/bin/bash"
+    args: "entrypoint_api.sh"
     image:
-      repository: projectorigin/ett-meteringpoints-api
+      repository: projectorigin/ett-meteringpoints
       tag: "latest"
       pullPolicy: IfNotPresent
   - name: consumer
     replicaCount: 1
+    command: "/bin/bash"
+    args: "entrypoint_consumer.sh"
     image:
-      repository: projectorigin/ett-meteringpoints-consumer
+      repository: projectorigin/ett-meteringpoints
       tag: "latest"
       pullPolicy: IfNotPresent
 
