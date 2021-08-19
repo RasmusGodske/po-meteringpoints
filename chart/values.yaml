@@ -11,7 +11,7 @@ deployments:
     image:
       repository: projectorigin/ett-meteringpoints
       tag: "latest"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
   - name: consumer
     replicaCount: 1
     command: "/bin/bash"
@@ -25,7 +25,7 @@ deployments:
     image:
       repository: projectorigin/ett-meteringpoints
       tag: "latest"
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
 
 service:
   deployment: api
