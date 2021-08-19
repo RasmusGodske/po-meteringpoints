@@ -33,6 +33,7 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+          {{- if .probes }}
           livenessProbe:
             httpGet:
               path: /health
@@ -41,5 +42,13 @@ spec:
             httpGet:
               path: /health
               port: http
+          {{- end }}
+          {{- if .env}}
+          env:
+          {{- range $key, $value := .env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end}}
+          {{- end}}
 {{- end }}
 
