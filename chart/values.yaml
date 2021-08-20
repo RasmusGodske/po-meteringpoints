@@ -33,7 +33,10 @@ service:
   port: 80
 
 ingress:
-  host: localhost
-  path: /api/meteringpoints
+  hosts:
+    - 172.18.0.19
+    - localhost
+    - dev2.eloprindelse.dk
+  paths:
+    - /api/meteringpoints
   servicePort: 80
-
