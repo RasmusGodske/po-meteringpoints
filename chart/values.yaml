@@ -1,42 +1,51 @@
+ett-base-helm-chart:
+  deployments:
+    - name: api
+      replicaCount: 1
+      command: "/bin/bash"
+      args: "entrypoint_api.sh"
+      probes: true
+      env:
+        SQL_URI: postgresql://postgres:1234@ett-postgresql.ett-postgresql.svc.cluster.local:5432/meteringpoints
+        SQL_POOL_SIZE: 1
+      image:
+        repository: projectorigin/ett-meteringpoints
+        tag: "latest"
+        pullPolicy: Always
+    - name: consumer
+      replicaCount: 1
+      command: "/bin/bash"
+      args: "entrypoint_consumer.sh"
+      probes: false
+      env:
+        EVENT_BUS_HOST: my-cluster-kafka-plain-bootstrap.ett-kafka.svc.cluster.local
+        EVENT_BUS_PORT: 9092
+        SQL_URI: postgresql://postgres:1234@ett-postgresql.ett-postgresql.svc.cluster.local:5432/meteringpoints
+        SQL_POOL_SIZE: 1
+      image:
+        repository: projectorigin/ett-meteringpoints
+        tag: "latest"
+        pullPolicy: Always
 
-deployments:
-  - name: api
-    replicaCount: 1
-    command: "/bin/bash"
-    args: "entrypoint_api.sh"
-    probes: true
-    env:
-      SQL_URI: postgresql://postgres:1234@ett-postgresql.ett-postgresql.svc.cluster.local:5432/meteringpoints
-      SQL_POOL_SIZE: 1
-    image:
-      repository: projectorigin/ett-meteringpoints
-      tag: "latest"
-      pullPolicy: Always
-  - name: consumer
-    replicaCount: 1
-    command: "/bin/bash"
-    args: "entrypoint_consumer.sh"
-    probes: false
-    env:
-      EVENT_BUS_HOST: my-cluster-kafka-plain-bootstrap.ett-kafka.svc.cluster.local
-      EVENT_BUS_PORT: 9092
-      SQL_URI: postgresql://postgres:1234@ett-postgresql.ett-postgresql.svc.cluster.local:5432/meteringpoints
-      SQL_POOL_SIZE: 1
-    image:
-      repository: projectorigin/ett-meteringpoints
-      tag: "latest"
-      pullPolicy: Always
+  service:
+    deployment: api
+    type: ClusterIP
+    port: 80
 
-service:
-  deployment: api
-  type: ClusterIP
-  port: 80
+  ingress:
+    hosts:
+      - 172.18.0.19
+      - localhost
+      - dev2.eloprindelse.dk
+    paths:
+      - /api/meteringpoints
+    servicePort: 80
+    middlewares:
+      - ett-auth-service
+      - meteringpoints-stripprefix
 
-ingress:
-  hosts:
-    - 172.18.0.19
-    - localhost
-    - dev2.eloprindelse.dk
-  paths:
-    - /api/meteringpoints
-  servicePort: 80
+  middleware:
+    stripPrefix:
+      name: meteringpoints-stripprefix
+      prefixes:
+        - /api/meteringpoints
