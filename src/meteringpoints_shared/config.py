@@ -1,6 +1,9 @@
 import os
 
 
+# Service description
+TOKEN_SECRET = '54321'
+
 # Event Bus
 EVENT_BUS_HOST = os.environ.get('EVENT_BUS_HOST', 'localhost')
 EVENT_BUS_PORT = int(os.environ.get('EVENT_BUS_PORT', 9092))

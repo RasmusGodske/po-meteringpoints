@@ -57,6 +57,15 @@ class DbMeteringPoint(db.ModelBase):
 
     # -- Relationships -------------------------------------------------------
 
+    address = relationship(
+        'DbMeteringPointAddress',
+        primaryjoin='foreign(DbMeteringPoint.gsrn) == DbMeteringPointAddress.gsrn',
+        uselist=False,
+        viewonly=True,
+        lazy='joined',
+    )
+
+    # TODO Rewrite this:
     technology = relationship(
         'DbTechnology',
         primaryjoin='foreign(DbMeteringPoint.gsrn) == DbMeteringPointTechnology.gsrn',
@@ -67,14 +76,6 @@ class DbMeteringPoint(db.ModelBase):
             'foreign(DbMeteringPointTechnology.fuel_code) == DbTechnology.fuel_code'
             ')'
         ),
-        uselist=False,
-        viewonly=True,
-        lazy='joined',
-    )
-
-    address = relationship(
-        'DbMeteringPointAddress',
-        primaryjoin='foreign(DbMeteringPoint.gsrn) == DbMeteringPointAddress.gsrn',
         uselist=False,
         viewonly=True,
         lazy='joined',
@@ -117,6 +118,20 @@ class DbMeteringPointTechnology(db.ModelBase):
     gsrn = sa.Column(sa.String(), index=True, nullable=False)
     tech_code = sa.Column(sa.String())
     fuel_code = sa.Column(sa.String())
+
+
+class DbMeteringPointDelegate(db.ModelBase):
+    """
+    TODO
+    """
+    __tablename__ = 'meteringpoint_delegate'
+    __table_args__ = (
+        sa.PrimaryKeyConstraint('gsrn'),
+        sa.UniqueConstraint('gsrn', 'subject'),
+    )
+
+    gsrn = sa.Column(sa.String(), index=True, nullable=False)
+    subject = sa.Column(sa.String())
 
 
 class DbTechnology(db.ModelBase):

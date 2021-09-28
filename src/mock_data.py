@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timedelta
 
-from energytt_platform.bus import messages as m, topics as t
+from energytt_platform.bus import get_default_broker, messages as m, topics as t
 from energytt_platform.models.common import Address
 from energytt_platform.models.tech import \
     Technology, TechnologyCodes, TechnologyType
@@ -10,11 +10,14 @@ from energytt_platform.models.measurements import \
 from energytt_platform.models.meteringpoints import \
     MeteringPoint, MeteringPointType
 
-from meteringpoints_consumer.bus import broker
+from meteringpoints_shared.config import EVENT_BUS_SERVERS
 
 
 # -- Technologies ------------------------------------------------------------
 
+broker = get_default_broker(
+    servers=EVENT_BUS_SERVERS,
+)
 
 broker.publish(
     topic=t.TECHNOLOGIES,
@@ -45,6 +48,29 @@ broker.publish(
             tech_code='T030303',
             fuel_code='F03030303',
             type=TechnologyType.coal,
+        ),
+    ),
+)
+
+
+broker.publish(
+    topic=t.TECHNOLOGIES,
+    msg=m.MeteringPointTechnologyUpdate(
+        gsrn='subject-80ecf905-d6b8-4a54-b437-653ee28e49ee-gsrn-1',
+        codes=TechnologyCodes(
+            tech_code='T030303',
+            fuel_code='F03030303',
+        ),
+    ),
+)
+
+
+broker.publish(
+    topic=t.TECHNOLOGIES,
+    msg=m.MeteringPointAddressUpdate(
+        gsrn='subject-80ecf905-d6b8-4a54-b437-653ee28e49ee-gsrn-2',
+        address=Address(
+            street_name='VEJNAVN!',
         ),
     ),
 )

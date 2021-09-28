@@ -1,8 +1,7 @@
 from energytt_platform.bus import MessageDispatcher, messages as m
 
 from meteringpoints_shared.db import db
-
-from .controller import controller
+from meteringpoints_shared.controller import controller
 
 
 # -- MeteringPoints ----------------------------------------------------------
@@ -92,6 +91,49 @@ def on_meteringpoint_technology_update(
         )
 
 
+# -- MeteringPoint Delegates -------------------------------------------------
+
+
+@db.atomic()
+def on_meteringpoint_delegate_granted(
+        msg: m.MeteringPointDelegateGranted,
+        session: db.Session,
+):
+    """
+    TODO
+
+    TODO How to handle MeteringPoints being moved between users?
+    TODO   Ie. a person moves address, so the [old] MeteringPoint is assigned
+    TODO   to someone else, but the former owner would want access to its
+    TODO   historical data?
+    """
+    controller.grant_meteringpoint_delegate(
+        session=session,
+        gsrn=msg.delegate.gsrn,
+        subject=msg.delegate.subject,
+    )
+
+
+@db.atomic()
+def on_meteringpoint_delegate_revoked(
+        msg: m.MeteringPointDelegateRevoked,
+        session: db.Session,
+):
+    """
+    TODO
+
+    TODO How to handle MeteringPoints being moved between users?
+    TODO   Ie. a person moves address, so the [old] MeteringPoint is assigned
+    TODO   to someone else, but the former owner would want access to its
+    TODO   historical data?
+    """
+    controller.revoke_meteringpoint_delegate(
+        session=session,
+        gsrn=msg.delegate.gsrn,
+        subject=msg.delegate.subject,
+    )
+
+
 # -- Technologies ------------------------------------------------------------
 
 
@@ -135,8 +177,8 @@ dispatcher = MessageDispatcher({
     m.MeteringPointRemoved: on_meteringpoint_removed,
     m.MeteringPointAddressUpdate: on_meteringpoint_address_update,
     m.MeteringPointTechnologyUpdate: on_meteringpoint_technology_update,
-    # m.MeteringPointDelegateGranted: on_meteringpoint_delegate_granted,
-    # m.MeteringPointDelegateRevoked: on_meteringpoint_delegate_revoked,
+    m.MeteringPointDelegateGranted: on_meteringpoint_delegate_granted,
+    m.MeteringPointDelegateRevoked: on_meteringpoint_delegate_revoked,
     m.TechnologyUpdate: on_technology_update,
     m.TechnologyRemoved: on_technology_removed,
 })
