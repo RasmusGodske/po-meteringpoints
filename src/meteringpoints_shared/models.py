@@ -52,8 +52,8 @@ class DbMeteringPoint(db.ModelBase):
     )
 
     gsrn = sa.Column(sa.String(), index=True, nullable=False)
-    sector = sa.Column(sa.String(), index=True, nullable=False)
-    type = sa.Column(sa.Enum(MeteringPointType), index=True, nullable=False)
+    sector = sa.Column(sa.String(), index=True)
+    type = sa.Column(sa.Enum(MeteringPointType), index=True)
 
     # -- Relationships -------------------------------------------------------
 

@@ -126,9 +126,9 @@ def get_dummy_meteringpoint_list(
 def get_dummy_token(
     token_encoder: TokenEncoder,
     subject: str,
-    actor: str = "foo",
+    actor: str = 'foo',
     expired: bool = False,
-    scopes: List[str] = []
+    scopes: List[str] = None,
 ):
     """
     Returns a dummy token
@@ -144,7 +144,7 @@ def get_dummy_token(
         expires=expires,
         actor=actor,
         subject=subject,
-        scope=scopes,
+        scope=scopes or [],
     )
 
     return token_encoder.encode(internal_token)

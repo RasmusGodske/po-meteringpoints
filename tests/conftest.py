@@ -49,12 +49,17 @@ def token_encoder():
         secret=TOKEN_SECRET,
     )
 
+
 @pytest.fixture(scope='function')
 def token_subject() -> str:
     yield "bar"    
 
+
 @pytest.fixture(scope='function')
-def valid_token(token_encoder: TokenEncoder[InternalToken], token_subject: str):
+def valid_token(
+        token_encoder: TokenEncoder[InternalToken],
+        token_subject: str,
+):
     """
     TODO
     """

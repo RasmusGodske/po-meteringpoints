@@ -1,5 +1,6 @@
 from typing import List, Optional
 from dataclasses import dataclass, field
+from serpyco import number_field
 
 from energytt_platform.api import Endpoint, Context
 from energytt_platform.models.meteringpoints import MeteringPoint
@@ -17,8 +18,9 @@ class GetMeteringPointList(Endpoint):
 
     @dataclass
     class Request:
-        offset: int
-        limit: int
+        # TODO Validate offset & limit upper/lower bounds:
+        offset: int = number_field(default=0, minimum=0)
+        limit: int = number_field(default=50, minimum=1, maximum=100)
         filters: Optional[MeteringPointFilters] = field(default=None)
         ordering: Optional[MeteringPointOrdering] = field(default=None)
 

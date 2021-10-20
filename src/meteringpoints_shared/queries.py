@@ -100,14 +100,6 @@ class MeteringPointQuery(SqlQuery):
             )),
         )
 
-    def get_distinct_gsrn(self) -> List[str]:
-        """
-        Returns a list of all distinct GSRN in the result set.
-        """
-        return [row[0] for row in self.session.query(
-            self.q.subquery().c.gsrn.distinct())]
-
-
 class MeteringPointAddressQuery(SqlQuery):
     """
     Query DbMeteringPointAddress.
