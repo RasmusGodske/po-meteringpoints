@@ -1,56 +1,70 @@
-from typing import List
-
 import pytest
+from typing import List
 from itertools import product
 
 from energytt_platform.models.common import Order
-from energytt_platform.models.meteringpoints import MeteringPoint
+from energytt_platform.models.meteringpoints import (
+    MeteringPoint,
+    MeteringPointType,
+)
 
 from meteringpoints_shared.db import db
-from energytt_platform.models.meteringpoints import MeteringPointType
-
 from meteringpoints_shared.models import (
     DbMeteringPoint,
-    DbMeteringPointDelegate, MeteringPointFilters, MeteringPointOrdering, MeteringPointOrderingKeys,
-    DbMeteringPointAddress, DbMeteringPointTechnology, DbTechnology,
+    DbMeteringPointAddress,
+    DbMeteringPointTechnology,
+    DbMeteringPointDelegate,
+    DbTechnology,
+    MeteringPointFilters,
+    MeteringPointOrdering,
+    MeteringPointOrderingKeys,
 )
-from meteringpoints_shared.queries import MeteringPointQuery, MeteringPointAddressQuery, MeteringPointTechnologyQuery, \
-    DelegateQuery, TechnologyQuery
+from meteringpoints_shared.queries import (
+    MeteringPointQuery,
+    MeteringPointAddressQuery,
+    MeteringPointTechnologyQuery,
+    DelegateQuery,
+    TechnologyQuery,
+)
 
 
 class TestMeteringPointQuery:
-    TYPES = (MeteringPointType.consumption, MeteringPointType.production)
-    SECTORS = ('DK1', 'DK2')
-    COMBINATIONS = list(product(TYPES, SECTORS))
+    """
+    Tests MeteringPointQuery.
+    """
 
     @pytest.fixture(scope='function')
     def seed_meteringpoints(self) -> List[MeteringPoint]:
         """
-        TODO
-
-        :return:
+        Returns a list of MeteringPoints to seed the database with before
+        before running tests.
         """
+        types = (MeteringPointType.consumption, MeteringPointType.production)
+        sectors = ('DK1', 'DK2')
+        combinations = product(types, sectors)
 
-        mp_list = []
+        meteringpoints = []
 
-        for i, (type, sector) in enumerate(self.COMBINATIONS):
-            mp_list.append(DbMeteringPoint(
+        for i, (type, sector) in enumerate(combinations):
+            meteringpoints.append(DbMeteringPoint(
                 gsrn=f'gsrn{i}',
                 type=type,
                 sector=sector,
             ))
 
-        return mp_list
+        return meteringpoints
 
-    @pytest.fixture(scope='function')
-    def seeded_session(
+    @pytest.fixture(scope='function', autouse=True)
+    def setup(
             self,
             session: db.Session,
             seed_meteringpoints: List[MeteringPoint],
-            token_subject: str,
-    ) -> db.Session:
+    ):
         """
-        TODO
+        Seeds the database with MeteringPoints before running tests.
+
+        :param session: Database session
+        :param seed_meteringpoints: MeteringPoints to seed database with
         """
         session.begin()
 
@@ -63,17 +77,20 @@ class TestMeteringPointQuery:
 
         session.commit()
 
-        yield session
-
     @pytest.mark.parametrize('gsrn', ('gsrn0', 'gsrn1', 'gsrn2'))
-    def test__has_gsrn__gsrn_exists__should_return_correct_meteringpoint(
+    def test__has_gsrn__meteringpoint_exists__should_return_correct_meteringpoint(  # noqa: E501
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             gsrn: str,
     ):
+        """
+        :param session: Database session
+        :param gsrn: GSRN to fetch from database (expected to exist)
+        """
+
         # -- Act -------------------------------------------------------------
 
-        query = MeteringPointQuery(seeded_session) \
+        query = MeteringPointQuery(session) \
             .has_gsrn(gsrn)
 
         # -- Assert ----------------------------------------------------------
@@ -82,36 +99,42 @@ class TestMeteringPointQuery:
         assert query.one().gsrn == gsrn
 
     @pytest.mark.parametrize('gsrn', ('unknown_gsrn_1', None))
-    def test__has_gsrn__gsrn_does_not_exists__should_return_no_meteringpoints(
+    def test__has_gsrn__meteringpoint_does_not_exist__should_return_no_meteringpoints(  # noqa: E501
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             gsrn: str,
     ):
-        # -- Act -------------------------------------------------------------
+        """
+        :param session: Database session
+        :param gsrn: GSRN to fetch from database (expected NOT to exist)
+        """
 
-        query = MeteringPointQuery(seeded_session) \
-            .has_gsrn(gsrn)
-
-        # -- Assert ----------------------------------------------------------
-
-        assert query.count() == 0
+        assert not MeteringPointQuery(session) \
+            .has_gsrn(gsrn) \
+            .exists()
 
     @pytest.mark.parametrize('gsrn, expected_gsrn_returned', (
-            (['gsrn0'], ['gsrn0']),
-            (['gsrn0', 'gsrn1'], ['gsrn0', 'gsrn1']),
-            (['unknown_gsrn_1'], []),
-            (['unknown_gsrn_1', 'gsrn1'], ['gsrn1']),
-            ([], []),
+        (['gsrn0'], ['gsrn0']),
+        (['gsrn0', 'gsrn1'], ['gsrn0', 'gsrn1']),
+        (['unknown_gsrn_1'], []),
+        (['unknown_gsrn_1', 'gsrn1'], ['gsrn1']),
+        ([], []),
     ))
     def test__has_any_gsrn__should_return_correct_meteringpoints(
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             gsrn: List[str],
             expected_gsrn_returned: List[str],
     ):
+        """
+        :param session: Database session
+        :param gsrn: GSRN numbers to fetch from database
+        :param expected_gsrn_returned: GSRN number to expect returned
+        """
+
         # -- Act -------------------------------------------------------------
 
-        query = MeteringPointQuery(seeded_session) \
+        query = MeteringPointQuery(session) \
             .has_any_gsrn(gsrn)
 
         # -- Assert ----------------------------------------------------------
@@ -120,142 +143,164 @@ class TestMeteringPointQuery:
         assert all(mp.gsrn in expected_gsrn_returned for mp in query.all())
 
     @pytest.mark.parametrize('meteringpoint_type', (
-            MeteringPointType.consumption,
-            MeteringPointType.production,
+        MeteringPointType.consumption,
+        MeteringPointType.production,
     ))
     def test__is_type__should_return_correct_meteringpoints(
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             meteringpoint_type: MeteringPointType,
     ):
+        """
+        :param session: Database session
+        :param meteringpoint_type: MeteringPoint type to select
+        """
+
         # -- Act -------------------------------------------------------------
 
-        query = MeteringPointQuery(seeded_session) \
-            .is_type(meteringpoint_type)
+        results = MeteringPointQuery(session) \
+            .is_type(meteringpoint_type) \
+            .all()
 
         # -- Assert ----------------------------------------------------------
 
-        assert query.count() > 0
-        assert all(mp.type is meteringpoint_type for mp in query.all())
+        assert len(results) > 0
+        assert all(mp.type is meteringpoint_type for mp in results)
 
-    @pytest.mark.parametrize('sector', (
-            'DK1',
-    ))
+    @pytest.mark.parametrize('sector', ('DK1', 'DK2'))
     def test__in_sector__sector_exists__should_return_correct_meteringpoints(
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             seed_meteringpoints: List[MeteringPoint],
             sector: str,
     ):
-        # -- Act - ------------------------------------------------------------
+        """
+        :param session: Database session
+        :param seed_meteringpoints: All seeded MeteringPoints
+        :param sector: Sector to select
+        """
 
-        query = MeteringPointQuery(seeded_session) \
-            .in_sector(sector)
+        # -- Act - -----------------------------------------------------------
+
+        results = MeteringPointQuery(session) \
+            .in_sector(sector) \
+            .all()
 
         # -- Assert ----------------------------------------------------------
 
-        assert query.count() == len([mp for mp in seed_meteringpoints if mp.sector == sector])
-        assert all(mp.sector == sector for mp in query.all())
+        expected_meteringpoints = \
+            [mp for mp in seed_meteringpoints if mp.sector == sector]
 
-    @pytest.mark.parametrize('sector', (
-            '',
-            'unknown_sector',
-    ))
+        assert len(results) > 0
+        assert len(results) == len(expected_meteringpoints)
+        assert all(mp.sector == sector for mp in results)
+
+    @pytest.mark.parametrize('sector', ('', 'unknown_sector', None))
     def test__in_sector__sector_does_not_exist__should_return_nothing(
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             seed_meteringpoints: List[MeteringPoint],
             sector: str,
     ):
-        # -- Act - ------------------------------------------------------------
+        """
+        :param session: Database session
+        :param seed_meteringpoints: All seeded MeteringPoints
+        :param sector: Sector to select
+        """
 
-        query = MeteringPointQuery(seeded_session) \
-            .in_sector(sector)
-
-        # -- Assert ----------------------------------------------------------
-
-        assert query.count() == 0
+        assert not MeteringPointQuery(session) \
+            .in_sector(sector) \
+            .exists()
 
     @pytest.mark.parametrize('sectors', (
-            ['DK1'],
-            ['DK1', 'DK2'],
-            ['unknown_sector'],
-            ['DK1', 'unknown_sector'],
-            ['DK1', 'DK1'],
-            [''],
-            [],
+        [],
+        [''],
+        [None],
+        ['DK1'],
+        ['DK1', 'DK2'],
+        ['unknown_sector'],
+        ['DK1', 'unknown_sector'],
+        ['DK1', 'DK1'],
     ))
     def test__in_any_sector__should_return_correct_meteringpoints(
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             seed_meteringpoints: List[MeteringPoint],
             sectors: List[str],
     ):
+        """
+        :param session: Database session
+        :param seed_meteringpoints: All seeded MeteringPoints
+        :param sectors: Sectors to select
+        """
+
         # -- Act -------------------------------------------------------------
 
-        query = MeteringPointQuery(seeded_session) \
-            .in_any_sector(sectors)
+        results = MeteringPointQuery(session) \
+            .in_any_sector(sectors) \
+            .all()
 
         # -- Assert ----------------------------------------------------------
 
-        assert query.count() == len([mp for mp in seed_meteringpoints if mp.sector in sectors])
-        assert all(meteringpoint.sector in sectors for meteringpoint in query.all())
+        expected_meteringpoints = \
+            [mp for mp in seed_meteringpoints if mp.sector in sectors]
 
-    @pytest.mark.parametrize('gsrn_with_delegated_access', (
-            ['gsrn1'],
-            ['gsrn1', 'gsrn2'],
-            [],
-    ))
-    def test__is_accessible_by__should_return_meteringpoints_with_delegated_access(
+        assert len(results) == len(expected_meteringpoints)
+        assert all(mp.sector in sectors for mp in results)
+
+    def test__is_accessible_by__should_return_meteringpoints_with_delegated_access(  # noqa: E501
             self,
-            seeded_session: db.Session,
-            seed_meteringpoints: List[MeteringPoint],
-            gsrn_with_delegated_access: List[str],
+            session: db.Session,
     ):
+        """
+        :param session: Database session
+        """
+
         # -- Arrange ---------------------------------------------------------
 
-        subject = 'subject1'
+        session.begin()
+        session.add(DbMeteringPointDelegate(gsrn='gsrn1', subject='subject1'))
+        session.add(DbMeteringPointDelegate(gsrn='gsrn2', subject='subject1'))
+        session.commit()
 
         # -- Act -------------------------------------------------------------
 
-        for gsrn in gsrn_with_delegated_access:
-            seeded_session.add(DbMeteringPointDelegate(
-                gsrn=gsrn,
-                subject=subject,
-            ))
-        seeded_session.commit()
-
-        query = MeteringPointQuery(seeded_session) \
-            .is_accessible_by(subject)
+        results = MeteringPointQuery(session) \
+            .is_accessible_by('subject1') \
+            .all()
 
         # -- Assert ----------------------------------------------------------
 
-        assert query.count() == len(gsrn_with_delegated_access)
-        assert all(mp.gsrn in gsrn_with_delegated_access for mp in query.all())
+        assert len(results) == 2
+        assert all(mp.gsrn in ('gsrn1', 'gsrn2') for mp in results)
 
     @pytest.mark.parametrize('filters', (
-            MeteringPointFilters(),
-            MeteringPointFilters(gsrn=['gsrn1']),
-            MeteringPointFilters(gsrn=['gsrn1', 'gsrn2']),
-            MeteringPointFilters(type=MeteringPointType.production),
-            MeteringPointFilters(type=MeteringPointType.consumption),
-            MeteringPointFilters(sector=['DK1']),
-            MeteringPointFilters(sector=['DK1', 'DK2']),
+        MeteringPointFilters(gsrn=['gsrn1', 'gsrn2']),
+        MeteringPointFilters(sector=['DK1']),
+        MeteringPointFilters(type=MeteringPointType.production),
+        MeteringPointFilters(
+            gsrn=['gsrn1'],
+            sector=['DK2'],
+            type=MeteringPointType.consumption,
+        ),
     ))
-    def test__query_apply_filters__meteringpoints_match_filters__should_return_correct_meteringpoints(
+    def test__apply_filters__meteringpoints_exists__should_return_correct_meteringpoints(  # noqa: E501
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             filters: MeteringPointFilters,
-            seed_meteringpoints: List[MeteringPoint],
     ):
+        """
+        :param session: Database session
+        :param filters: Filter to apply to query
+        """
 
         # -- Act -------------------------------------------------------------
 
-        results = MeteringPointQuery(seeded_session) \
+        results = MeteringPointQuery(session) \
             .apply_filters(filters) \
             .all()
 
-        # -- Assert -------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
         assert len(results) > 0
 
@@ -269,43 +314,57 @@ class TestMeteringPointQuery:
             assert all(mp.sector in filters.sector for mp in results)
 
     @pytest.mark.parametrize('filters', (
-            MeteringPointFilters(gsrn=[]),
-            MeteringPointFilters(gsrn=['UNKNOWN_GSRN']),
-            MeteringPointFilters(sector=[]),
-            MeteringPointFilters(sector=['UNKNOWN_SECTOR']),
+        MeteringPointFilters(gsrn=['foo', 'bar']),
+        MeteringPointFilters(sector=['spam']),
+        MeteringPointFilters(gsrn=['foobar'], sector=['DK2']),
+        MeteringPointFilters(gsrn=['gsrn1'], sector=['foobar']),
     ))
-    def test__query_apply_filters__meteringpoints_does_not_match_filters__should_return_no_meteringpoints(
+    def test__query_apply_filters__meteringpoints_does_not_exist__should_return_no_meteringpoints(  # noqa: E501
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             filters: MeteringPointFilters,
-            seed_meteringpoints: List[MeteringPoint],
     ):
+        """
+        :param session: Database session
+        :param filters: Filter to apply to query
+        """
 
-        # -- Act -------------------------------------------------------------
-
-        results = MeteringPointQuery(seeded_session) \
+        assert not MeteringPointQuery(session) \
             .apply_filters(filters) \
-            .all()
-
-        # -- Assert -------------------------------------------------------------
-
-        assert len(results) == 0
+            .exists()
 
     @pytest.mark.parametrize('ordering', (
-            MeteringPointOrdering(key=MeteringPointOrderingKeys.gsrn, order=Order.asc),
-            MeteringPointOrdering(key=MeteringPointOrderingKeys.gsrn, order=Order.desc),
-            MeteringPointOrdering(key=MeteringPointOrderingKeys.sector, order=Order.asc),
-            MeteringPointOrdering(key=MeteringPointOrderingKeys.sector, order=Order.desc),
+        MeteringPointOrdering(
+            key=MeteringPointOrderingKeys.gsrn,
+            order=Order.asc,
+        ),
+        MeteringPointOrdering(
+            key=MeteringPointOrderingKeys.gsrn,
+            order=Order.desc,
+        ),
+        MeteringPointOrdering(
+            key=MeteringPointOrderingKeys.sector,
+            order=Order.asc,
+        ),
+        MeteringPointOrdering(
+            key=MeteringPointOrderingKeys.sector,
+            order=Order.desc,
+        ),
     ))
     def test__apply_ordering__should_return_correct_meteringpoints(
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             ordering: MeteringPointOrdering,
             seed_meteringpoints: List[MeteringPoint],
     ):
+        """
+        :param session: Database session
+        :param ordering: Ordering to apply to query
+        """
+
         # -- Act -------------------------------------------------------------
 
-        results = MeteringPointQuery(seeded_session) \
+        results = MeteringPointQuery(session) \
             .apply_ordering(ordering) \
             .all()
 
@@ -314,398 +373,297 @@ class TestMeteringPointQuery:
         sort_descending = ordering.order == Order.desc
 
         if ordering.key is MeteringPointOrderingKeys.gsrn:
-            f = lambda mp: mp.gsrn
+            f = lambda mp: mp.gsrn  # noqa: E731
         elif ordering.key is MeteringPointOrderingKeys.sector:
-            f = lambda mp: mp.sector
+            f = lambda mp: mp.sector  # noqa: E731
         else:
             raise RuntimeError('Should not happen')
 
+        gsrn_expected = [mp.gsrn for mp in sorted(
+            seed_meteringpoints, key=f, reverse=sort_descending)]
+
         assert len(results) == len(seed_meteringpoints)
-        assert [mp.gsrn for mp in results] == \
-               [mp.gsrn for mp in sorted(seed_meteringpoints,
-                                         key=f, reverse=sort_descending)]
+        assert [mp.gsrn for mp in results] == gsrn_expected
 
 
 class TestMeteringPointAddressQuery:
-    def test__has_gsrn__gsrn_exists__should_return_correct_meteringpointaddress(
+    """
+    Tests MeteringPointAddressQuery.
+    """
+
+    def test__has_gsrn__address_exists__should_return_correct_address(
             self,
             session: db.Session,
     ):
-        # -- Arrange -------------------------------------------------------------
+        """
+        :param session: Database session
+        """
 
-        gsrn = 'gsrn1'
+        # -- Arrange ---------------------------------------------------------
 
-        session.add(DbMeteringPoint(
-            gsrn=gsrn,
-            type=MeteringPointType.consumption,
-            sector='DK1',
-        ))
-
-        session.add(DbMeteringPointAddress(
-            gsrn=gsrn,
-            street_code='street_code_1',
-            street_name='street_name_1',
-            building_number='building_number_1',
-            floor_id='floor_id_1',
-            room_id='room_id_1',
-            post_code='post_code_1',
-            city_name='city_name_1',
-            city_sub_division_name='city_sub_division_name1',
-            municipality_code='municipality_code_1',
-            location_description='location_description_1',
-        ))
-
+        session.begin()
+        session.add(DbMeteringPointAddress(gsrn='gsrn1'))
+        session.add(DbMeteringPointAddress(gsrn='gsrn2'))
         session.commit()
 
-        # -- Act -----------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
-        result = MeteringPointAddressQuery(session) \
-            .has_gsrn(gsrn) \
-            .all()
+        address = MeteringPointAddressQuery(session) \
+            .has_gsrn('gsrn1') \
+            .one()
 
-        # -- Assert --------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
-        assert len(result) == 1
-        assert result[0].gsrn == gsrn
+        assert address.gsrn == 'gsrn1'
 
-    @pytest.mark.parametrize('gsrn', ('unknown_gsrn_1', None))
-    def test__has_gsrn__gsrn_does_not_exists__should_not_return_any_meteringpointaddress(
+    @pytest.mark.parametrize('gsrn', ('', None, 'unknown_gsrn_1'))
+    def test__has_gsrn__address_does_not_exists__should_not_return_anything(
             self,
             session: db.Session,
             gsrn: str,
     ):
-        # -- Arrange -------------------------------------------------------------
+        """
+        :param session: Database session
+        :param gsrn: GSRN to select
+        """
 
-        session.add(DbMeteringPoint(
-            gsrn='gsrn1',
-            type=MeteringPointType.consumption,
-            sector='DK1',
-        ))
-
-        session.add(DbMeteringPointAddress(
-            gsrn='gsrn1',
-            street_code='street_code_1',
-            street_name='street_name_1',
-            building_number='building_number_1',
-            floor_id='floor_id_1',
-            room_id='room_id_1',
-            post_code='post_code_1',
-            city_name='city_name_1',
-            city_sub_division_name='city_sub_division_name1',
-            municipality_code='municipality_code_1',
-            location_description='location_description_1',
-        ))
-
-        session.commit()
-
-        # -- Act -----------------------------------------------------------------
-
-        result = MeteringPointAddressQuery(session) \
+        assert not MeteringPointAddressQuery(session) \
             .has_gsrn(gsrn) \
-            .all()
-
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) == 0
+            .exists()
 
 
 class TestMeteringPointTechnologyQuery:
-    def test__has_gsrn__gsrn_exists__should_return_correct_meteringpointtechnology(
+    """
+    Tests MeteringPointTechnologyQuery.
+    """
+
+    def test__has_gsrn__technology_exists__should_return_correct_technology(
             self,
             session: db.Session,
     ):
-        # -- Arrange -------------------------------------------------------------
+        """
+        :param session: Database session
+        """
 
-        gsrn = 'gsrn1'
+        # -- Arrange ---------------------------------------------------------
 
-        session.add(DbMeteringPoint(
-            gsrn=gsrn,
-            type=MeteringPointType.consumption,
-            sector='DK1',
+        session.begin()
+
+        session.add(DbMeteringPointTechnology(
+            gsrn='gsrn1',
+            tech_code='T010101',
+            fuel_code='F01010101',
         ))
 
         session.add(DbMeteringPointTechnology(
-            gsrn=gsrn,
-            tech_code='100',
-            fuel_code='102',
+            gsrn='gsrn2',
+            tech_code='T020202',
+            fuel_code='F02020202',
         ))
 
         session.commit()
 
-        # -- Act -----------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
-        result = MeteringPointTechnologyQuery(session) \
-            .has_gsrn(gsrn) \
-            .all()
+        technology = MeteringPointTechnologyQuery(session) \
+            .has_gsrn('gsrn1') \
+            .one()
 
-        # -- Assert --------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
-        assert len(result) == 1
-        assert result[0].gsrn == gsrn
+        assert technology.gsrn == 'gsrn1'
 
-    @pytest.mark.parametrize('gsrn', ('unknown_gsrn_1', None))
-    def test__has_gsrn__gsrn_does_not_exists__should_not_return_any_meteringpointtechnology(
+    @pytest.mark.parametrize('gsrn', ('', None, 'unknown_gsrn_1'))
+    def test__has_gsrn__gsrn_does_not_exists__should_not_return_anything(
             self,
             session: db.Session,
             gsrn: str,
     ):
-        # -- Arrange -------------------------------------------------------------
+        """
+        :param session: Database session
+        :param gsrn: GSRN to select
+        """
 
-        session.add(DbMeteringPoint(
-            gsrn='gsrn1',
-            type=MeteringPointType.consumption,
-            sector='DK1',
-        ))
-
-        session.add(DbMeteringPointTechnology(
-            gsrn='gsrn1',
-            tech_code='100',
-            fuel_code='102',
-        ))
-
-        session.commit()
-
-        # -- Act -----------------------------------------------------------------
-
-        result = MeteringPointTechnologyQuery(session) \
+        assert not MeteringPointTechnologyQuery(session) \
             .has_gsrn(gsrn) \
-            .all()
-
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) == 0
+            .exists()
 
 
 class TestDelegateQuery:
-    # FIXME: Following tests fails when running with the other tests, but succeed when running alone
-    #  - test__has_subject__single_subject_exists__should_return_correct_delegate
-    #  - test__has_subject__single_subject_exists__should_return_correct_delegate
-    DELEGATE_1 = DbMeteringPointDelegate(
-        gsrn='gsrn1',
-        subject='subject1',
-    )
+    """
+    Tests DelegateQuery.
+    """
 
-    DELEGATE_2 = DbMeteringPointDelegate(
-        gsrn='gsrn2',
-        subject='subject2',
-    )
-
-    # NOTE: Shares subject with DELEGATE_2
-    DELEGATE_3 = DbMeteringPointDelegate(
-        gsrn='gsrn3',
-        subject='subject2',
-    )
-
-    @pytest.fixture(scope='function')
-    def seeded_session(
+    @pytest.fixture(scope='function', autouse=True)
+    def setup(
             self,
             session: db.session
-    ) -> db.Session:
-
-        session.add(self.DELEGATE_1)
-        session.add(self.DELEGATE_2)
-        session.add(self.DELEGATE_3)
-        session.commit()
-        yield session
-
-    def test__has_gsrn__single_gsrn_exists__should_return_correct_delegate(
-            self,
-            seeded_session: db.Session,
     ):
-        # -- Act -----------------------------------------------------------------
+        """
+        Seeds the database with MeteringPointDelegates before running tests.
 
-        result = DelegateQuery(seeded_session) \
-            .has_gsrn(self.DELEGATE_2.gsrn) \
+        :param session: Database session
+        """
+        session.begin()
+        session.add(DbMeteringPointDelegate(gsrn='gsrn1', subject='subject1'))
+        session.add(DbMeteringPointDelegate(gsrn='gsrn1', subject='subject2'))
+        session.add(DbMeteringPointDelegate(gsrn='gsrn2', subject='subject1'))
+        session.add(DbMeteringPointDelegate(gsrn='gsrn2', subject='subject2'))
+        session.commit()
+
+    def test__has_gsrn__delegates_exists__should_return_correct_delegates(
+            self,
+            session: db.Session,
+    ):
+        """
+        :param session: Database session
+        """
+
+        # -- Assert ----------------------------------------------------------
+
+        delegates = DelegateQuery(session) \
+            .has_gsrn('gsrn1') \
             .all()
 
-        # -- Assert --------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
-        assert len(result) == 1
-        assert result[0].gsrn == self.DELEGATE_2.gsrn
+        assert len(delegates) == 2
+        assert all(delegate.gsrn == 'gsrn1' for delegate in delegates)
 
-    @pytest.mark.parametrize('gsrn', ('unknown_gsrn_1', None))
-    def test__has_gsrn__gsrn_does_not_exists__should_not_return_any_delegate(
+    @pytest.mark.parametrize('gsrn', ('', None, 'unknown_gsrn'))
+    def test__has_gsrn__delegate_does_not_exist__should_not_return_anything(
             self,
-            seeded_session: db.Session,
+            session: db.Session,
             gsrn: str,
     ):
-        # -- Act -----------------------------------------------------------------
+        """
+        :param session: Database session
+        :param gsrn: GSRN to select
+        """
 
-        result = DelegateQuery(seeded_session) \
+        assert not DelegateQuery(session) \
             .has_gsrn(gsrn) \
-            .all()
+            .exists()
 
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) == 0
-
-    def test__has_subject__single_subject_exists__should_return_correct_delegate(
+    def test__has_subject__delegates_exists__should_return_correct_delegates(
             self,
-            seeded_session: db.Session,
+            session: db.Session,
     ):
-        # -- Act -----------------------------------------------------------------
+        """
+        :param session: Database session
+        """
 
-        result = DelegateQuery(seeded_session) \
-            .has_subject(self.DELEGATE_1.subject) \
+        # -- Assert ----------------------------------------------------------
+
+        delegates = DelegateQuery(session) \
+            .has_subject('subject1') \
             .all()
 
-        # -- Assert --------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
-        assert len(result) == 1
-        assert result[0].subject == self.DELEGATE_1.subject
+        assert len(delegates) == 2
+        assert all(delegate.subject == 'subject1' for delegate in delegates)
 
-    def test__has_subject__multiple_subject_exists__should_return_correct_delegate(
+    @pytest.mark.parametrize('subject', ('', None, 'unknown_subject'))
+    def test__has_subject__delegate_does_not_exist__should_not_return_anything(  # noqa: E501
             self,
-            seeded_session: db.Session,
-    ):
-        # -- Act -----------------------------------------------------------------
-
-        result = DelegateQuery(seeded_session) \
-            .has_subject(self.DELEGATE_2.subject) \
-            .all()
-
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) == 2
-        assert all(delegate.subject == self.DELEGATE_2.subject for delegate in result)
-
-    @pytest.mark.parametrize('subject', ('unknown_subject_1', None))
-    def test__has_subject__subject_does_not_exists__should_not_return_any_delegate(
-            self,
-            seeded_session: db.Session,
+            session: db.Session,
             subject: str,
     ):
-        # -- Act -----------------------------------------------------------------
+        """
+        :param session: Database session
+        :param subject: Subject to select
+        """
 
-        result = DelegateQuery(seeded_session) \
+        assert not DelegateQuery(session) \
             .has_subject(subject) \
-            .all()
-
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) == 0
+            .exists()
 
 
 class TestTechnologyQuery:
-    # FIXME: Following tests fails when running with the other tests, but succeed when running alone
-    # - test__has_fuel_code__multiple_exists__should_return_correct_technology
-    # - test__has_fuel_code__single_exists__should_return_correct_technology
-    TECHNOLOGY_1 = DbTechnology(
-        tech_code='100',
-        fuel_code='101',
-    )
+    """
+    Tests TechnologyQuery.
+    """
 
-    TECHNOLOGY_2 = DbTechnology(
-        tech_code='200',
-        fuel_code='201',
-    )
-
-    # Shares codes with the others
-    TECHNOLOGY_3 = DbTechnology(
-        tech_code='100',
-        fuel_code='201',
-    )
-
-    @pytest.fixture(scope='function')
-    def seeded_session(
+    @pytest.fixture(scope='function', autouse=True)
+    def setup(
             self,
             session: db.session
-    ) -> db.Session:
-        session.add(self.TECHNOLOGY_1)
-        session.add(self.TECHNOLOGY_2)
-        session.add(self.TECHNOLOGY_3)
+    ):
+        """
+        Seeds the database with Technologies before running tests.
+
+        :param session: Database session
+        """
+        session.begin()
+        session.add(DbTechnology(tech_code='T010101', fuel_code='F01010101'))
+        session.add(DbTechnology(tech_code='T010101', fuel_code='F02020202'))
+        session.add(DbTechnology(tech_code='T020202', fuel_code='F01010101'))
+        session.add(DbTechnology(tech_code='T020202', fuel_code='F02020202'))
         session.commit()
-        yield session
 
-    def test__has_tech_code__single_exists__should_return_correct_technology(
+    def test__has_tech_code__technology_exists__should_return_correct_technologies(  # noqa: E501
             self,
-            seeded_session: db.Session,
+            session: db.Session,
     ):
+        """
+        :param session: Database session
+        """
 
-        # -- Act -----------------------------------------------------------------
+        # -- Act -------------------------------------------------------------
 
-        result = TechnologyQuery(seeded_session) \
-            .has_tech_code(self.TECHNOLOGY_2.tech_code) \
+        results = TechnologyQuery(session) \
+            .has_tech_code('T010101') \
             .all()
 
-        # -- Assert --------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
-        assert len(result) == 1
-        assert result[0].tech_code == self.TECHNOLOGY_2.tech_code
+        assert len(results) == 2
+        assert all(tech.tech_code == 'T010101' for tech in results)
 
-    def test__has_tech_code__multiple_exists__should_return_correct_technology(
+    @pytest.mark.parametrize('tech_code', ('', None, 'unknown_tech_code'))
+    def test__has_tech_code__technology_does_not_exists__should_not_return_anything(  # noqa: E501
             self,
-            seeded_session: db.Session,
-    ):
-        # -- Act -----------------------------------------------------------------
-
-        result = TechnologyQuery(seeded_session) \
-            .has_tech_code(self.TECHNOLOGY_3.tech_code) \
-            .all()
-
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) > 0
-        assert all(tech.tech_code == self.TECHNOLOGY_3.tech_code for tech in result)
-
-    @pytest.mark.parametrize('tech_code', ('unknown_tech_code', None))
-    def test__has_tech_code__does_not_exists__should_not_return_any_technology(
-            self,
-            seeded_session: db.Session,
+            session: db.Session,
             tech_code: str,
     ):
-        # -- Act -----------------------------------------------------------------
+        """
+        :param session: Database session
+        """
 
-        result = TechnologyQuery(seeded_session) \
+        assert not TechnologyQuery(session) \
             .has_tech_code(tech_code) \
-            .all()
+            .exists()
 
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) == 0
-
-    def test__has_fuel_code__single_exists__should_return_correct_technology(
+    def test__has_fuel_code__technology_exists__should_return_correct_technologies(  # noqa: E501
             self,
-            seeded_session: db.Session,
+            session: db.Session,
     ):
-        # -- Act -----------------------------------------------------------------
+        """
+        :param session: Database session
+        """
 
-        result = TechnologyQuery(seeded_session) \
-            .has_fuel_code(self.TECHNOLOGY_1.fuel_code) \
+        # -- Act -------------------------------------------------------------
+
+        results = TechnologyQuery(session) \
+            .has_fuel_code('F01010101') \
             .all()
 
-        # -- Assert --------------------------------------------------------------
+        # -- Assert ----------------------------------------------------------
 
-        assert len(result) == 1
-        assert result[0].fuel_code == self.TECHNOLOGY_1.fuel_code
+        assert len(results) == 2
+        assert all(tech.fuel_code == 'F01010101' for tech in results)
 
-    def test__has_fuel_code__multiple_exists__should_return_correct_technology(
+    @pytest.mark.parametrize('fuel_code', ('', None, 'unknown_fuel_code'))
+    def test__has_fuel_code__technology_does_not_exists__should_not_return_anything(  # noqa: E501
             self,
-            seeded_session: db.Session,
-    ):
-        # -- Act -----------------------------------------------------------------
-
-        result = TechnologyQuery(seeded_session) \
-            .has_fuel_code(self.TECHNOLOGY_3.fuel_code) \
-            .all()
-
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) > 0
-        assert all(tech.fuel_code == self.TECHNOLOGY_3.fuel_code for tech in result)
-
-    @pytest.mark.parametrize('fuel_code', ('unknown_fuel_code', None))
-    def test__has_fuel_code__does_not_exists__should_not_return_any_technology(
-            self,
-            seeded_session: db.Session,
+            session: db.Session,
             fuel_code: str,
     ):
-        # -- Act -----------------------------------------------------------------
+        """
+        :param session: Database session
+        """
 
-        result = TechnologyQuery(seeded_session) \
+        assert not TechnologyQuery(session) \
             .has_fuel_code(fuel_code) \
-            .all()
-
-        # -- Assert --------------------------------------------------------------
-
-        assert len(result) == 0
+            .exists()

@@ -1,29 +1,33 @@
 from energytt_platform.api import Application, ScopedGuard
 
-from meteringpoints_shared.config import TOKEN_SECRET
+from meteringpoints_shared.config import INTERNAL_TOKEN_SECRET
 
-from .endpoints import (
-    GetMeteringPointList,
-    GetMeteringPointDetails,
-    # OnboardMeteringPointsFromWebAccessCode,
-    # OnboardMeteringPointsFromCPR,
-    # OnboardMeteringPointsFromCVR,
-)
+from .endpoints import GetMeteringPointList, GetMeteringPointDetails
 
 
 def create_app() -> Application:
     """
     Creates a new instance of the application.
     """
-    return Application.create(
+
+    app = Application.create(
         name='MeteringPoints API',
-        secret=TOKEN_SECRET,
+        secret=INTERNAL_TOKEN_SECRET,
         health_check_path='/health',
-        endpoints=(
-            ('POST', '/list', GetMeteringPointList(), [ScopedGuard('meteringpoints.read')]),
-            ('GET',  '/details', GetMeteringPointDetails(), [ScopedGuard('meteringpoints.read')]),
-            # ('POST', '/onboard/web-access-code', OnboardMeteringPointsFromWebAccessCode()),
-            # ('POST', '/onboard/cpr', OnboardMeteringPointsFromCPR()),
-            # ('POST', '/onboard/cvr', OnboardMeteringPointsFromCVR()),
-        ),
     )
+
+    app.add_endpoint(
+        method='POST',
+        path='/list',
+        endpoint=GetMeteringPointList(),
+        guards=[ScopedGuard('meteringpoints.read')],
+    )
+
+    app.add_endpoint(
+        method='GET',
+        path='/details',
+        endpoint=GetMeteringPointDetails(),
+        guards=[ScopedGuard('meteringpoints.read')],
+    )
+
+    return app

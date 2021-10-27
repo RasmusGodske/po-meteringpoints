@@ -1,0 +1,108 @@
+name: Lint and Test
+
+on:
+  pull_request: {}
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+
+env:
+  python-version: 3.8
+  cache-directory: ~/.local/share/virtualenvs
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Install dependencies
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python ${{ env.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.python-version }}
+
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: ${{ env.cache-directory }}
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile') }}
+
+      - name: Install Pipenv
+        run: python -m pip install --upgrade pipenv
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pipenv update --dev
+
+  linting:
+    runs-on: ubuntu-latest
+    name: Linting
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python ${{ env.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.python-version }}
+
+      - name: Install Pipenv
+        run: python -m pip install --upgrade pipenv
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ env.cache-directory }}
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile') }}
+
+      - name: Analysing the code with flake8
+        run: pipenv run flake8
+
+  unittest:
+    runs-on: ubuntu-latest
+    name: Unittests
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python ${{ env.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.python-version }}
+
+      - name: Install Pipenv
+        run: python -m pip install --upgrade pipenv
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ env.cache-directory }}
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile') }}
+
+      - name: Run unittests
+        working-directory: ./src
+        run: pipenv run python -m pytest ../tests/unittest/
+
+  integrationtest:
+    runs-on: ubuntu-latest
+    name: Integrationtests
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python ${{ env.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.python-version }}
+
+      - name: Install Pipenv
+        run: python -m pip install --upgrade pipenv
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ env.cache-directory }}
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile') }}
+
+      - name: Run integrationtest
+        working-directory: ./src
+        run: pipenv run python -m pytest ../tests/integrationstest/

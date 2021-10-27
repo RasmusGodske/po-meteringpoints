@@ -15,11 +15,11 @@ class TestOnMeteringPointUpdate:
     TODO
     """
 
-    @pytest.mark.parametrize('all_gsrn, delete_gsrn, expected_remaining_gsrn', (
+    @pytest.mark.parametrize('all_gsrn, delete_gsrn, expected_remaining_gsrn', (  # noqa: E501
         (['gsrn1', 'gsrn2', 'gsrn3'], 'gsrn1', ['gsrn2', 'gsrn3']),
         (['gsrn1', 'gsrn2', 'gsrn3'], 'FooBar', ['gsrn1', 'gsrn2', 'gsrn3']),
     ))
-    def test__add_many_meteringpoints_then_remove_one__should_return_only_remaining_meteringpoints(
+    def test__add_many_meteringpoints_then_remove_one__should_return_only_remaining_meteringpoints(  # noqa: E501
             self,
             all_gsrn: List[str],
             delete_gsrn: str,

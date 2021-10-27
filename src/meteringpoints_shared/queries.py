@@ -26,7 +26,10 @@ class MeteringPointQuery(SqlQuery):
     def _get_base_query(self) -> orm.Query:
         return self.session.query(DbMeteringPoint)
 
-    def apply_filters(self, filters: MeteringPointFilters) -> 'MeteringPointQuery':
+    def apply_filters(
+            self,
+            filters: MeteringPointFilters,
+    ) -> 'MeteringPointQuery':
         """
         Applies provided filters.
         """
@@ -41,7 +44,10 @@ class MeteringPointQuery(SqlQuery):
 
         return q
 
-    def apply_ordering(self, ordering: MeteringPointOrdering) -> 'MeteringPointQuery':
+    def apply_ordering(
+            self,
+            ordering: MeteringPointOrdering,
+    ) -> 'MeteringPointQuery':
         """
         Applies provided ordering.
         """
@@ -60,31 +66,36 @@ class MeteringPointQuery(SqlQuery):
 
     def has_gsrn(self, gsrn: str) -> 'MeteringPointQuery':
         """
-        Filters query; only include MeteringPoint with the provided GSRN.
+        Filters query; only include MeteringPoint with the
+        provided GSRN.
         """
         return self.filter(DbMeteringPoint.gsrn == gsrn)
 
     def has_any_gsrn(self, gsrn: List[str]) -> 'MeteringPointQuery':
         """
-        Filters query; only include MeteringPoints with any of the provided GSRN.
+        Filters query; only include MeteringPoints with any of
+        the provided GSRN.
         """
         return self.filter(DbMeteringPoint.gsrn.in_(gsrn))
 
     def is_type(self, type: MeteringPointType) -> 'MeteringPointQuery':
         """
-        Filters query; only include MeteringPoints with the provided type.
+        Filters query; only include MeteringPoints with the
+        provided type.
         """
         return self.filter(DbMeteringPoint.type == type)
 
     def in_sector(self, sector: str) -> 'MeteringPointQuery':
         """
-        Filters query; only include MeteringPoints within the provided sector.
+        Filters query; only include MeteringPoints within the
+        provided sector.
         """
         return self.filter(DbMeteringPoint.sector == sector)
 
     def in_any_sector(self, sector: List[str]) -> 'MeteringPointQuery':
         """
-        Filters query; only include MeteringPoints within any of the provided sectors.
+        Filters query; only include MeteringPoints within any
+        of the provided sectors.
         """
         return self.filter(DbMeteringPoint.sector.in_(sector))
 
@@ -99,6 +110,7 @@ class MeteringPointQuery(SqlQuery):
                 DbMeteringPointDelegate.subject == subject,
             )),
         )
+
 
 class MeteringPointAddressQuery(SqlQuery):
     """

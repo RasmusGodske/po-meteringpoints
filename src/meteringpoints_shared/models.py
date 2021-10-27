@@ -1,9 +1,8 @@
 import sqlalchemy as sa
-from sqlalchemy.orm import relationship
-
 from enum import Enum
 from typing import List, Optional
 from dataclasses import dataclass, field
+from sqlalchemy.orm import relationship
 
 from energytt_platform.serialize import Serializable
 from energytt_platform.models.tech import TechnologyType
@@ -59,21 +58,21 @@ class DbMeteringPoint(db.ModelBase):
 
     address = relationship(
         'DbMeteringPointAddress',
-        primaryjoin='foreign(DbMeteringPoint.gsrn) == DbMeteringPointAddress.gsrn',
+        primaryjoin='foreign(DbMeteringPoint.gsrn) == DbMeteringPointAddress.gsrn',  # noqa: E501
         uselist=False,
         viewonly=True,
         lazy='joined',
     )
 
-    # TODO Rewrite this:
+    # TODO Rewrite this?
     technology = relationship(
         'DbTechnology',
-        primaryjoin='foreign(DbMeteringPoint.gsrn) == DbMeteringPointTechnology.gsrn',
+        primaryjoin='foreign(DbMeteringPoint.gsrn) == DbMeteringPointTechnology.gsrn',  # noqa: E501
         secondary='meteringpoint_technology',
         secondaryjoin=(
             'and_('
-            'foreign(DbMeteringPointTechnology.tech_code) == DbTechnology.tech_code,'
-            'foreign(DbMeteringPointTechnology.fuel_code) == DbTechnology.fuel_code'
+            'foreign(DbMeteringPointTechnology.tech_code) == DbTechnology.tech_code,'  # noqa: E501
+            'foreign(DbMeteringPointTechnology.fuel_code) == DbTechnology.fuel_code'  # noqa: E501
             ')'
         ),
         uselist=False,
@@ -126,8 +125,7 @@ class DbMeteringPointDelegate(db.ModelBase):
     """
     __tablename__ = 'meteringpoint_delegate'
     __table_args__ = (
-        sa.PrimaryKeyConstraint('gsrn'),
-        sa.UniqueConstraint('gsrn', 'subject'),
+        sa.PrimaryKeyConstraint('gsrn', 'subject'),
     )
 
     gsrn = sa.Column(sa.String(), index=True, nullable=False)

@@ -96,16 +96,16 @@ class TestOnMeteringPointUpdate:
 
     # -- MeteringPointUpdate handler ----------------------------------
     @pytest.mark.parametrize('meteringpoint, updated_meteringpoint, meteringpoint_expected', (  # noqa: E501
-            (
-                METERINGPOINT,
-                METERINGPOINT_WITH_ADDRESS_1,
-                METERINGPOINT_WITH_ADDRESS_1_SIMPLE,
-            ),
-            (
-                METERINGPOINT_WITH_ADDRESS_1,
-                METERINGPOINT_WITH_ADDRESS_2,
-                METERINGPOINT_WITH_ADDRESS_2_SIMPLE,
-            ),
+        (
+            METERINGPOINT,
+            METERINGPOINT_WITH_ADDRESS_1,
+            METERINGPOINT_WITH_ADDRESS_1_SIMPLE,
+        ),
+        (
+            METERINGPOINT_WITH_ADDRESS_1,
+            METERINGPOINT_WITH_ADDRESS_2,
+            METERINGPOINT_WITH_ADDRESS_2_SIMPLE,
+        ),
     ))
     def test__add_a_meteringpoint_without_address_then_update_the_address__should_return_updated_meteringpoint(  # noqa: E501
             self,
@@ -256,26 +256,26 @@ class TestOnMeteringPointUpdate:
 
 class TestMeteringPointAddressUpdate:
     @pytest.mark.parametrize('meteringpoint, updated_address', (  # noqa: E501
-            (
-                METERINGPOINT_WITH_ADDRESS_1,
-                ADDRESS_2,
-            ),
-            (
-                METERINGPOINT_WITH_ADDRESS_2,
-                ADDRESS_1,
-            ),
-            (
-                METERINGPOINT_WITH_ADDRESS_1,
-                None,
-            ),
-            (
-                METERINGPOINT,
-                ADDRESS_1,
-            ),
-            (
-                METERINGPOINT_WITH_ADDRESS_2,
-                ADDRESS_2,
-            ),
+        (
+            METERINGPOINT_WITH_ADDRESS_1,
+            ADDRESS_2,
+        ),
+        (
+            METERINGPOINT_WITH_ADDRESS_2,
+            ADDRESS_1,
+        ),
+        (
+            METERINGPOINT_WITH_ADDRESS_1,
+            None,
+        ),
+        (
+            METERINGPOINT,
+            ADDRESS_1,
+        ),
+        (
+            METERINGPOINT_WITH_ADDRESS_2,
+            ADDRESS_2,
+        ),
     ))
     def test__add_a_meteringpoint_then_update_address__should_return_updated_meteringpoint(  # noqa: E501
             self,

@@ -1,12 +1,13 @@
+from datetime import datetime, timezone, timedelta
+
 import pytest
+from energytt_platform.models.auth import InternalToken
 from flask.testing import FlaskClient
 from typing import List, Dict, Any, Tuple, Optional
 
 from energytt_platform.tokens import TokenEncoder
 
 from meteringpoints_shared.db import db
-
-from tests.helpers import get_dummy_token
 
 
 TEndpoint = Tuple[str, str, List[str], Optional[Dict[str, Any]]]
@@ -40,13 +41,17 @@ class TestScopes:
 
         method, path, scopes, query = endpoint
 
-        token = get_dummy_token(
-            token_encoder=token_encoder,
-            subject='bar',
+        token = InternalToken(
+            issued=datetime.now(tz=timezone.utc),
+            expires=datetime.now(timezone.utc) + timedelta(hours=1),
             actor='foo',
-            expired=False,
-            scopes=scopes,
+            subject='bar',
+            scope=scopes,
         )
+
+        token_encoded = token_encoder.encode(token)
+
+        # -- Act -------------------------------------------------------------
 
         if method == 'GET':
             func = client.get
@@ -55,14 +60,10 @@ class TestScopes:
         else:
             raise RuntimeError('Should not have happened!')
 
-        # -- Act -------------------------------------------------------------
-
         r = func(
             path=path,
             query_string=query,
-            headers={
-                'Authorization': f'Bearer: {token}'
-            },
+            headers={'Authorization': f'Bearer: {token_encoded}'},
         )
 
         # -- Assert ----------------------------------------------------------
@@ -86,13 +87,17 @@ class TestScopes:
 
         method, path, _, query = endpoint
 
-        token = get_dummy_token(
-            token_encoder=token_encoder,
-            subject='bar',
+        token = InternalToken(
+            issued=datetime.now(tz=timezone.utc),
+            expires=datetime.now(timezone.utc) + timedelta(hours=1),
             actor='foo',
-            expired=False,
-            scopes=scopes,
+            subject='bar',
+            scope=scopes,
         )
+
+        token_encoded = token_encoder.encode(token)
+
+        # -- Act -------------------------------------------------------------
 
         if method == 'GET':
             func = client.get
@@ -101,14 +106,10 @@ class TestScopes:
         else:
             raise RuntimeError('Should not have happened!')
 
-        # -- Act -------------------------------------------------------------
-
         r = func(
             path=path,
             query_string=query,
-            headers={
-                'Authorization': f'Bearer: {token}'
-            },
+            headers={'Authorization': f'Bearer: {token_encoded}'},
         )
 
         # -- Assert ----------------------------------------------------------

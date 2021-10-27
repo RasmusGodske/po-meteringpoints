@@ -44,6 +44,7 @@ METERINGPOINTS = [
     METERINGPOINT_3,
 ]
 
+
 # TODO: Remove seedin function, no need for it
 @pytest.fixture(scope='function')
 def seed_meteringpoints(session: db.Session,):

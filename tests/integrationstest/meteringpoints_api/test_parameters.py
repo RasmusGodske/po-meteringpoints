@@ -1,13 +1,12 @@
-from typing import List, Any
 import pytest
+from typing import List, Any
 from itertools import product
 from flask.testing import FlaskClient
 
-from energytt_platform.models.meteringpoints import MeteringPoint
+from energytt_platform.models.meteringpoints import \
+    MeteringPoint, MeteringPointType
 
 from meteringpoints_shared.db import db
-from energytt_platform.models.meteringpoints import MeteringPointType
-
 from meteringpoints_shared.models import (
     DbMeteringPoint,
     DbMeteringPointDelegate,
@@ -156,8 +155,8 @@ class TestGetMeteringPointList:
     # -- Filter by Type ------------------------------------------------------
 
     @pytest.mark.parametrize('type', (
-            MeteringPointType.consumption,
-            MeteringPointType.production,
+        MeteringPointType.consumption,
+        MeteringPointType.production,
     ))
     def test__filter_by_valid_type__should_return_correct_meteringpoints(
         self,
@@ -222,9 +221,9 @@ class TestGetMeteringPointList:
     # -- Filter by Sector ----------------------------------------------------
 
     @pytest.mark.parametrize('sectors, expected_num_results', (
-            (['DK1'], 2),
-            (['DK2'], 2),
-            (['DK1', 'DK2'], 4),
+        (['DK1'], 2),
+        (['DK2'], 2),
+        (['DK1', 'DK2'], 4),
     ))
     def test__filter_by_known_sectors__should_return_correct_meteringpoints(
         self,
@@ -345,10 +344,10 @@ class TestGetMeteringPointList:
         assert len(r.json['meteringpoints']) == len(COMBINATIONS)
 
     @pytest.mark.parametrize('offset, expected_num_results', (
-            (0, 4),
-            (1, 3),
-            (2, 2),
-            (9999, 0),
+        (0, 4),
+        (1, 3),
+        (2, 2),
+        (9999, 0),
     ))
     def test__provide_valid_offset__should_return_correct_number_of_meteringpoints(  # noqa: E501
         self,
@@ -425,11 +424,11 @@ class TestGetMeteringPointList:
         assert len(r.json['meteringpoints']) == 4
 
     @pytest.mark.parametrize('limit, expected_num_results', (
-            (1, 1),
-            (2, 2),
-            (3, 3),
-            (4, 4),
-            (5, 4),
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 4),
     ))
     def test__provide_valid_limit__should_return_correct_number_of_meteringpoints(  # noqa: E501
         self,

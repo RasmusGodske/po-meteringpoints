@@ -1,16 +1,18 @@
 import pytest
-from typing import List, Optional
-
-from energytt_platform.models.tech import Technology, TechnologyType, TechnologyCodes
-from energytt_platform.serialize import simple_serializer
+from typing import Optional
 from flask.testing import FlaskClient
 
 from energytt_platform.bus import messages as m
-from energytt_platform.models.meteringpoints import MeteringPoint, MeteringPointType
+from energytt_platform.serialize import simple_serializer
 from energytt_platform.models.delegates import MeteringPointDelegate
+from energytt_platform.models.tech import \
+    Technology, TechnologyType, TechnologyCodes
+from energytt_platform.models.meteringpoints import \
+    MeteringPoint, MeteringPointType
 
 from meteringpoints_consumer.handlers import dispatcher
 from meteringpoints_shared.db import db
+
 
 TECHNOLOGY_1 = Technology(
     tech_code="100",
@@ -44,7 +46,7 @@ METERINGPOINT_WITH_TECHNOLOGY_2 = MeteringPoint(
     technology=TECHNOLOGY_2,
 )
 
-METERINGPOINT_2_simple = simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
+METERINGPOINT_2_simple = simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)  # noqa: E501
 
 METERINGPOINTS = [
     METERINGPOINT_WITHOUT_TECHNOLOGY,
@@ -87,11 +89,11 @@ class TestMeteringPointTechnologyUpdate:
     """
 
     @pytest.mark.parametrize('meteringpoint, updated_technology', (
-            (METERINGPOINT_WITHOUT_TECHNOLOGY, TECHNOLOGY_1),
-            (METERINGPOINT_WITH_TECHNOLOGY_1, TECHNOLOGY_2),
-            (METERINGPOINT_WITH_TECHNOLOGY_1, TECHNOLOGY_1),
+        (METERINGPOINT_WITHOUT_TECHNOLOGY, TECHNOLOGY_1),
+        (METERINGPOINT_WITH_TECHNOLOGY_1, TECHNOLOGY_2),
+        (METERINGPOINT_WITH_TECHNOLOGY_1, TECHNOLOGY_1),
     ))
-    def test__update_meteringpoint_technology__should_return_updated_meteringpoint_technology(
+    def test__update_meteringpoint_technology__should_return_updated_meteringpoint_technology(  # noqa: E501
             self,
             seed_meteringpoints: db.Session,
             client: FlaskClient,
@@ -138,7 +140,8 @@ class TestMeteringPointTechnologyUpdate:
 
         # -- Assert ----------------------------------------------------------
 
-        expected_meteringpoint_simple = simple_serializer.serialize(meteringpoint)
+        expected_meteringpoint_simple = \
+            simple_serializer.serialize(meteringpoint)
         expected_meteringpoint_simple['technology'] = \
             simple_serializer.serialize(updated_technology)
 
@@ -149,7 +152,7 @@ class TestMeteringPointTechnologyUpdate:
             'meteringpoints': [expected_meteringpoint_simple],
         }
 
-    def test__update_meteringpoint_technology_to_none__should_return_meteringpoint_technology(
+    def test__update_meteringpoint_technology_to_none__should_return_meteringpoint_technology(  # noqa: E501
             self,
             seed_meteringpoints: db.Session,
             client: FlaskClient,
@@ -185,7 +188,8 @@ class TestMeteringPointTechnologyUpdate:
 
         # -- Assert ----------------------------------------------------------
 
-        expected_meteringpoint_simple = simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
+        expected_meteringpoint_simple = \
+            simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
         expected_meteringpoint_simple['technology'] = None
 
         assert r.status_code == 200
@@ -195,7 +199,7 @@ class TestMeteringPointTechnologyUpdate:
             'meteringpoints': [expected_meteringpoint_simple],
         }
 
-    def test__add_two_meteringpoints_update_one__should_update_only_update_correct_meteringpoint_technology(
+    def test__add_two_meteringpoints_update_one__should_update_only_update_correct_meteringpoint_technology(  # noqa: E501
             self,
             seed_meteringpoints: db.Session,
             client: FlaskClient,
@@ -231,18 +235,21 @@ class TestMeteringPointTechnologyUpdate:
         assert r.status_code == 200
 
         # Make dictionary from fetched meteringpoint
-        result_mp_technology_dict = {mp['gsrn']: mp['technology'] for mp in r.json['meteringpoints']}
+        result_dict = {
+            mp['gsrn']: mp['technology']
+            for mp in r.json['meteringpoints']
+        }
 
         # Updated meteringpoint expected to be updated
-        assert result_mp_technology_dict[METERINGPOINT_WITHOUT_TECHNOLOGY.gsrn] == \
+        assert result_dict[METERINGPOINT_WITHOUT_TECHNOLOGY.gsrn] == \
                simple_serializer.serialize(TECHNOLOGY_1)
 
         # Expected to stay the same
-        assert result_mp_technology_dict[METERINGPOINT_WITH_TECHNOLOGY_1.gsrn] == \
+        assert result_dict[METERINGPOINT_WITH_TECHNOLOGY_1.gsrn] == \
                simple_serializer.serialize(TECHNOLOGY_1)
 
         # Expected to stay the same
-        assert result_mp_technology_dict[METERINGPOINT_WITH_TECHNOLOGY_2.gsrn] == \
+        assert result_dict[METERINGPOINT_WITH_TECHNOLOGY_2.gsrn] == \
                simple_serializer.serialize(TECHNOLOGY_2)
 
 
@@ -282,7 +289,8 @@ class TestTechnologyUpdate:
 
         # -- Assert ----------------------------------------------------------
 
-        expected_meteringpoint_simple = simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
+        expected_meteringpoint_simple = \
+            simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
 
         assert r.status_code == 200
         assert r.json == {
@@ -316,7 +324,8 @@ class TestTechnologyUpdate:
 
         # -- Assert ----------------------------------------------------------
 
-        expected_meteringpoint_simple = simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
+        expected_meteringpoint_simple = \
+            simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
         expected_meteringpoint_simple['technology'] = None
 
         assert r.status_code == 200
@@ -332,7 +341,7 @@ class TestTechnologyRemoved:
     TODO
     """
 
-    def test__remove_technology__should_return_meteringpoint_technology_equals_none(
+    def test__remove_technology__should_return_meteringpoint_technology_equals_none(  # noqa: E501
             self,
             seed_meteringpoints: db.Session,
             client: FlaskClient,
@@ -369,7 +378,8 @@ class TestTechnologyRemoved:
 
         assert r.status_code == 200
 
-        expected_meteringpoint_simple = simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
+        expected_meteringpoint_simple = \
+            simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
         expected_meteringpoint_simple['technology'] = None
 
         assert r.json == {
@@ -378,7 +388,7 @@ class TestTechnologyRemoved:
             'meteringpoints': [expected_meteringpoint_simple],
         }
 
-    def test__remove_different_technology__should_return_meteringpoint_technology(
+    def test__remove_different_technology__should_return_meteringpoint_technology(  # noqa: E501
             self,
             seed_meteringpoints: db.Session,
             client: FlaskClient,
@@ -420,7 +430,8 @@ class TestTechnologyRemoved:
 
         # -- Assert ----------------------------------------------------------
 
-        expected_meteringpoint_simple = simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
+        expected_meteringpoint_simple = \
+            simple_serializer.serialize(METERINGPOINT_WITH_TECHNOLOGY_1)
 
         assert r.status_code == 200
         assert r.json == {

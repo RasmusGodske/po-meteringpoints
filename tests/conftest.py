@@ -4,15 +4,16 @@ https://docs.pytest.org/en/2.7.3/plugins.html?highlight=re#conftest-py-plugins
 """
 import pytest
 from unittest.mock import patch
+from flask.testing import FlaskClient
 from datetime import datetime, timedelta, timezone
-
-from energytt_platform.models.auth import InternalToken
-from energytt_platform.tokens import TokenEncoder
 from testcontainers.postgres import PostgresContainer
+
+from energytt_platform.tokens import TokenEncoder
+from energytt_platform.models.auth import InternalToken
 
 from meteringpoints_api.app import create_app
 from meteringpoints_shared.db import db
-from meteringpoints_shared.config import TOKEN_SECRET
+from meteringpoints_shared.config import INTERNAL_TOKEN_SECRET
 
 
 @pytest.fixture(scope='function')
@@ -21,7 +22,7 @@ def session():
     TODO
     """
     with PostgresContainer('postgres:13.4') as psql:
-        with patch('meteringpoints_shared.db.db.uri', new=psql.get_connection_url()):
+        with patch('meteringpoints_shared.db.db.uri', new=psql.get_connection_url()):  # noqa: E501
 
             # Apply migrations
             db.ModelBase.metadata.create_all(db.engine)
@@ -32,7 +33,7 @@ def session():
 
 
 @pytest.fixture(scope='module')
-def client():
+def client() -> FlaskClient:
     """
     TODO
     """
@@ -40,30 +41,30 @@ def client():
 
 
 @pytest.fixture(scope='module')
-def token_encoder():
+def token_encoder() -> TokenEncoder[InternalToken]:
     """
-    TODO
+    Returns InternalToken encoder with correct secret embedded.
     """
     return TokenEncoder(
         schema=InternalToken,
-        secret=TOKEN_SECRET,
+        secret=INTERNAL_TOKEN_SECRET,
     )
 
 
 @pytest.fixture(scope='function')
 def token_subject() -> str:
-    yield "bar"    
+    yield 'bar'
 
 
 @pytest.fixture(scope='function')
 def valid_token(
         token_encoder: TokenEncoder[InternalToken],
         token_subject: str,
-):
+) -> InternalToken:
     """
     TODO
     """
-    yield InternalToken(
+    return InternalToken(
         issued=datetime.now(tz=timezone.utc),
         expires=datetime.now(tz=timezone.utc) + timedelta(days=1),
         actor='foo',
@@ -76,9 +77,8 @@ def valid_token(
 def valid_token_encoded(
         valid_token: InternalToken,
         token_encoder: TokenEncoder[InternalToken],
-):
+) -> str:
     """
     TODO
     """
     yield token_encoder.encode(valid_token)
-

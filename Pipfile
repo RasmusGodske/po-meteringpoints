@@ -4,10 +4,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-mypy = "*"
+flake8 = "*"
+pytest = "*"
+testcontainers = "*"
 
 [packages]
-peterplys = "0.4.1"
+peterplys = "0.4.6"
 
 [scripts]
 update-platform = "pip install --upgrade ./../ett-platform-utils"

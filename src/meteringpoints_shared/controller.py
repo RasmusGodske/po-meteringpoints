@@ -108,9 +108,12 @@ class DatabaseController(object):
         meteringpoint_address.room_id = address.room_id
         meteringpoint_address.post_code = address.post_code
         meteringpoint_address.city_name = address.city_name
-        meteringpoint_address.city_sub_division_name = address.city_sub_division_name
-        meteringpoint_address.municipality_code = address.municipality_code
-        meteringpoint_address.location_description = address.location_description
+        meteringpoint_address.city_sub_division_name = \
+            address.city_sub_division_name
+        meteringpoint_address.municipality_code = \
+            address.municipality_code
+        meteringpoint_address.location_description = \
+            address.location_description
 
     def delete_meteringpoint_address(
             self,

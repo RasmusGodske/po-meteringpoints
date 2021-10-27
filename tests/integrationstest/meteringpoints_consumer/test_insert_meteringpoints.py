@@ -90,24 +90,24 @@ class TestOnMeteringPointUpdate:
     """
 
     @pytest.mark.parametrize('meteringpoint, meteringpoint_expected', (
-            (
-                METERINGPOINT,
-                METERINGPOINT_SIMPLE,
-            ),
-            (
-                METERINGPOINT_WITH_TECHNOLOGY,
-                METERINGPOINT_WITH_TECHNOLOGY_SIMPLE,
-            ),
-            (
-                METERINGPOINT_WITH_ADDRESS,
-                METERINGPOINT_WITH_ADDRESS_SIMPLE,
-            ),
-            (
-                METERINGPOINT_WITH_TECHNOLOGY_AND_ADDRESS,
-                METERINGPOINT_WITH_TECHNOLOGY_AND_ADDRESS_SIMPLE,
-            ),
+        (
+            METERINGPOINT,
+            METERINGPOINT_SIMPLE,
+        ),
+        (
+            METERINGPOINT_WITH_TECHNOLOGY,
+            METERINGPOINT_WITH_TECHNOLOGY_SIMPLE,
+        ),
+        (
+            METERINGPOINT_WITH_ADDRESS,
+            METERINGPOINT_WITH_ADDRESS_SIMPLE,
+        ),
+        (
+            METERINGPOINT_WITH_TECHNOLOGY_AND_ADDRESS,
+            METERINGPOINT_WITH_TECHNOLOGY_AND_ADDRESS_SIMPLE,
+        ),
     ))
-    def test__add_a_meteringpoint_and_delegate_access__should_return_meteringpoint_correctly(
+    def test__add_a_meteringpoint_and_delegate_access__should_return_meteringpoint_correctly(  # noqa: E501
             self,
             meteringpoint: MeteringPoint,
             meteringpoint_expected: Dict[str, Any],
@@ -159,7 +159,7 @@ class TestOnMeteringPointUpdate:
             'meteringpoints': [meteringpoint_expected],
         }
 
-    def test__add_a_meteringpoint_then_update_it__should_return_updated_meteringpoint(
+    def test__add_a_meteringpoint_then_update_it__should_return_updated_meteringpoint(  # noqa: E501
             self,
             session: db.Session,
             client: FlaskClient,
@@ -213,10 +213,10 @@ class TestOnMeteringPointUpdate:
         assert r.json == {
             'success': True,
             'total': 1,
-            'meteringpoints': [METERINGPOINT_WITH_TECHNOLOGY_AND_ADDRESS_SIMPLE],
+            'meteringpoints': [METERINGPOINT_WITH_TECHNOLOGY_AND_ADDRESS_SIMPLE],  # noqa: E501
         }
 
-    def test__add_many_meteringpoints_and_delegate_access__should_return_meteringpoints_correctly(
+    def test__add_many_meteringpoints_and_delegate_access__should_return_meteringpoints_correctly(  # noqa: E501
             self,
             session: db.Session,
             client: FlaskClient,

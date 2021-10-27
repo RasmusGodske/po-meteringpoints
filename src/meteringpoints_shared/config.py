@@ -1,16 +1,28 @@
 import os
 
 
-# Service description
-TOKEN_SECRET = '54321'
+# -- General -----------------------------------------------------------------
 
-# Event Bus
-EVENT_BUS_HOST = os.environ.get('EVENT_BUS_HOST', 'localhost')
-EVENT_BUS_PORT = int(os.environ.get('EVENT_BUS_PORT', 9092))
-EVENT_BUS_SERVERS = [
-    f'{EVENT_BUS_HOST}:{EVENT_BUS_PORT}',
-]
+# Secret used to sign internal token
+INTERNAL_TOKEN_SECRET = os.environ.get('INTERNAL_TOKEN_SECRET', '')
 
-# SQL
-SQL_URI = os.getenv('SQL_URI', 'postgresql://postgres:1234@localhost:5432/meteringpoints')
+
+# -- Message Bus -------------------------------------------------------------
+
+# Message Bus host
+MESSAGE_BUS_HOST = os.environ.get('MESSAGE_BUS_HOST', '')
+
+# Message Bus post
+MESSAGE_BUS_PORT = int(os.environ.get('MESSAGE_BUS_PORT', 9092))
+
+# List of Message Bus servers
+MESSAGE_BUS_SERVERS = [f'{MESSAGE_BUS_HOST}:{MESSAGE_BUS_PORT}']
+
+
+# -- SQL ---------------------------------------------------------------------
+
+# SqlAlchemy connection string
+SQL_URI = os.environ.get('SQL_URI', '')
+
+# Number of concurrent connection to SQL database
 SQL_POOL_SIZE = int(os.getenv('SQL_POOL_SIZE', 1))
