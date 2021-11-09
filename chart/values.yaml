@@ -33,10 +33,7 @@ ett-base-helm-chart:
     port: 80
 
   ingress:
-    hosts:
-      - 172.18.0.19
-      - localhost
-      - dev2.eloprindelse.dk
+    hosts: []
     paths:
       - /api/meteringpoints
     servicePort: 80
