@@ -1,3 +1,8 @@
+#### Notes ####
+##### NOTES #####
+# In order to trigger create a personal token has to be provided instead of GITHUB_TOKEN
+
+
 on:
   push:
     branches:
@@ -12,8 +17,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        # with:
+        #   token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         
  
       - name: Define version
