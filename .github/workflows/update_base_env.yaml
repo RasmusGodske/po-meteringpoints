@@ -28,10 +28,14 @@ jobs:
           repository: ${{ env.BASE_ENV_REPO }}
           ref: ${{ env.BASE_ENV_REPO_BRANCH }}
 
-      # - name: Define version
+      - name: Define version
+        id: define_version
+        run: |
+          echo "ls"
+
+      # - name: Get Event payload
       #   id: define_version
       #   run: |
-      #     echo "ls"
       #     echo "${{ github.event.client_payload.docker_image_tag }}"
 
       # - name: Checkout code
