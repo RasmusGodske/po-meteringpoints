@@ -17,6 +17,7 @@ name: Create Release
 env:
   REPO_NAME: ${{ github.event.repository.name }}
   REPO_OWNER: ${{ github.repository_owner }}
+  UPDATE_BASE_ENV_TRIGGER_EVENT: update_base_env
 
 jobs:
   # build:
@@ -62,7 +63,7 @@ jobs:
           --header 'authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}' \
           --header 'content-type: application/json' \
           --data '{
-            "event_type": "repo_updated",
+            "event_type": "${{ env.UPDATE_BASE_ENV_TRIGGER_EVENT }}",
             "client_payload": {
                 "repo": "${{ github.repository }}",
                 "docker_image_tag": "v.1.2.3"
