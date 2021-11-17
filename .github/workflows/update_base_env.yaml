@@ -16,8 +16,8 @@ env:
   BASE_ENV_REPO: "RasmusGodske/po-base-environment"
   BASE_ENV_REPO_BRANCH: "main"
 
-  NEW_BRANCH_NAME: "auto_update/po-meteringpoint-updated--${{DOCKER_IMAGE_VERSION_TAG}}"
   DOCKER_IMAGE_VERSION_TAG: "V0.1.2"
+  NEW_BRANCH_NAME: "auto_update/po-meteringpoint-updated--${{DOCKER_IMAGE_VERSION_TAG}}"
   
 
 jobs:
