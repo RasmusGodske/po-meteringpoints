@@ -12,6 +12,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Define version
+        run: |
+          export MAJOR=0
+          export MINOR=0
+          export PATCH=${{ github.run_number }}
+          export VERSION_NUMBER="V${MAJOR}.${MINOR}.${PATCH}"
+          echo "::set-env name=VERSION_NUMBER::$VERSION_NUMBER"
+        
+      - name: test
+        run: echo $VERSION_NUMBER
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
