@@ -27,11 +27,19 @@ jobs:
         with:
           repository: ${{ env.BASE_ENV_REPO }}
           ref: ${{ env.BASE_ENV_REPO_BRANCH }}
+          
 
       - name: Define version
-        id: define_version
         run: |
           echo "ls"
+      
+      - run: |
+          date > generated.txt
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "generated"
+          git push
 
       # - name: Get Event payload
       #   id: define_version
