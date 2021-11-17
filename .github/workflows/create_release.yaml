@@ -34,10 +34,10 @@ jobs:
       #     draft: false
       #     title: Release ${{steps.define_version.outputs.VERSION_NUMBER}}
  
-      - name: Test
-        env: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: echo "${{ env.GITHUB_TOKEN }}"
+      # - name: Test
+      #   env: 
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: echo "${{ env.GITHUB_TOKEN }}"
  
       - name: Create Release
         id: create_release
