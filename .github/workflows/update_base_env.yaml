@@ -7,16 +7,25 @@ on:
   #   workflows: ["Create Release"]
   #   types:
   #     - completed
-      
+
+env:
+  BASE_ENV_REPO: "RasmusGodske/po-base-environment"
+  BASE_ENV_REPO_BRANCH: "RasmusGodske/po-base-environment"
+
 jobs:
   build:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ env.BASE_ENV_REPO }}
+          ref: ${{ env.BASE_ENV_REPO_BRANCH }}
+
       - name: Define version
         id: define_version
         run: |
-          echo "${{ github.event.client_payload.repo }}"
+          echo "ls"
           echo "${{ github.event.client_payload.docker_image_tag }}"
 
       - name: Checkout code
