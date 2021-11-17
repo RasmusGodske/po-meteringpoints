@@ -20,10 +20,11 @@ jobs:
           export MINOR=0
           export PATCH=${{ github.run_number }}
           export VERSION_NUMBER="V${MAJOR}.${MINOR}.${PATCH}"
+          echo $VERSION_NUMBER
           echo "::set-output name=VERSION_NUMBER::$VERSION_NUMBER"
         
       - name: test
-        run: echo ${{steps.vars.define_version.outputs.VERSION_NUMBER}}
+        run: echo ${{steps.define_version.outputs.VERSION_NUMBER}}
 
       # - name: Create Release
       #   id: create_release
