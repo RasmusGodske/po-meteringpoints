@@ -17,7 +17,7 @@ env:
   BASE_ENV_REPO_BRANCH: "main"
 
   DOCKER_IMAGE_VERSION_TAG: "V0.1.2"
-  NEW_BRANCH_NAME: "auto_update/po-meteringpoint-updated--${{DOCKER_IMAGE_VERSION_TAG}}"
+  NEW_BRANCH_NAME: "auto_update/po-meteringpoint-updated--${{ env.DOCKER_IMAGE_VERSION_TAG}}"
   
 
 jobs:
