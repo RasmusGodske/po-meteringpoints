@@ -2,7 +2,7 @@ name: Update base Env
 
 on:
   repository_dispatch:
-    types: [repo_updated]
+    types: [update_base_env]
   # workflow_run:
   #   workflows: ["Create Release"]
   #   types:

@@ -17,7 +17,9 @@ name: Create Release
 env:
   REPO_NAME: ${{ github.event.repository.name }}
   REPO_OWNER: ${{ github.repository_owner }}
-  UPDATE_BASE_ENV_TRIGGER_EVENT: update_base_env
+  
+  # The event which the update_base_env workflow listens to
+  UPDATE_BASE_ENV_TRIGGER_EVENT: "update_base_env" 
 
 jobs:
   # build:
