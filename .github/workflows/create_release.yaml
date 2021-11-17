@@ -28,7 +28,7 @@ jobs:
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          repo_token: "${{  secrets.SSH_KEY }}"
+          repo_token: ${{ secrets.SSH_KEY }}
           automatic_release_tag: ${{steps.define_version.outputs.VERSION_NUMBER}}
           prerelease: false
           draft: false
