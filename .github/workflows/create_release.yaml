@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.SSH_KEY }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         
  
       - name: Define version
@@ -28,7 +28,7 @@ jobs:
 
       - uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
-          repo_token: ${{ secrets.SSH_KEY }}
+          repo_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           automatic_release_tag: ${{steps.define_version.outputs.VERSION_NUMBER}}
           prerelease: false
           draft: false
@@ -43,7 +43,7 @@ jobs:
       #   id: create_release
       #   uses: actions/create-release@v1
       #   env:
-      #     GITHUB_TOKEN: ${{ secrets.SSH_KEY }}
+      #     GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       #   with:
       #     tag_name: ${{steps.define_version.outputs.VERSION_NUMBER}}
       #     release_name: Release ${{steps.define_version.outputs.VERSION_NUMBER}}
