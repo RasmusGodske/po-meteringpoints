@@ -67,7 +67,7 @@ jobs:
             "event_type": "${{ env.UPDATE_BASE_ENV_TRIGGER_EVENT }}",
             "client_payload": {
                 "caller_repo": "${{ github.repository }}",
-                "caller_job_url": "${{ env.JOB_URL }}"
+                "caller_job_url": "${{ env.JOB_URL }}",
                 "docker_image_tag": "v.1.2.3"
               }
             }'
