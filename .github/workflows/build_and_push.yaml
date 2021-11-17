@@ -8,7 +8,7 @@ env:
   # Name of the docker image
   DOCKER_IMAGE: godske/test
   
-  DOCKER_TAG: "${{ GITHUB_REF##*/ }}"
+  DOCKER_TAG: ${GITHUB_REF#refs/tags/}
   
   # Url of the current job
   JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
