@@ -8,6 +8,8 @@ env:
   # Name of the docker image
   DOCKER_IMAGE: godske/test
   
+  DOCKER_TAG: ${GITHUB_REF##*/}
+  
   # Url of the current job
   JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
   
@@ -54,6 +56,7 @@ jobs:
                 "caller_repo": "${{ github.server_url }}/${{ github.repository }}",
                 "caller_job_url": "${{ env.JOB_URL }}",
                 "docker_image_url": "${{ steps.meta.outputs.tags[0] }}",
+                "test": "${{ env.DOCKER_TAG }}",
                 "docker_image_tag": "${{ steps.meta.outputs.tags }}"
               }
             }'
