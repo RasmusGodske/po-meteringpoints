@@ -1,10 +1,12 @@
 name: Update base Env
 
 on:
-  workflow_run:
-    workflows: ["Create Release"]
-    types:
-      - completed
+  repository_dispatch:
+    types: [repo_updated]
+  # workflow_run:
+  #   workflows: ["Create Release"]
+  #   types:
+  #     - completed
       
 jobs:
   build:
@@ -14,7 +16,7 @@ jobs:
       - name: Define version
         id: define_version
         run: |
-          echo "ran"
+          echo ${{ github.event.client_payload.repo }}
 
       - name: Checkout code
         uses: actions/checkout@v2
