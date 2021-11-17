@@ -38,6 +38,7 @@ jobs:
           date > generated.txt
           git config user.name github-actions
           git config user.email github-actions@github.com
+          git checkout -b "auto_update/po-meteringpoint-updated"
           git add .
           git commit -m "generated"
           git push
