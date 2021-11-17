@@ -26,7 +26,7 @@ jobs:
           echo $VERSION_NUMBER
           echo "::set-output name=VERSION_NUMBER::$VERSION_NUMBER"
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
           repo_token: ${{ secrets.SSH_KEY }}
           automatic_release_tag: ${{steps.define_version.outputs.VERSION_NUMBER}}
