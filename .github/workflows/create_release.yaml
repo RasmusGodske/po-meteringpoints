@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: Directory update request
         run: |
-          [ -z "${{ secrets.ISSUE_PAT }}" ] && echo "Skipping, no ISSUE_PAT" && exit 0
+          [ -z "${{ secrets.PERSONAL_ACCESS_TOKEN }}" ] && echo "Skipping, no PERSONAL_ACCESS_TOKEN" && exit 0
           curl --request POST \
           --url https://api.github.com/repos/RasmusGodske/po-meteringpoints/dispatches \
           --header 'authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}' \
