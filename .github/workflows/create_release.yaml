@@ -56,6 +56,7 @@ jobs:
           --data '{
             "event_type": "repo_updated",
             "client_payload": {
-                "repo": "${{ github.repository }}"
+                "repo": "${{ github.repository }}",
+                "docker_image_tag": "v.1.2.3"
               }
             }'
