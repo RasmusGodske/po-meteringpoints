@@ -16,8 +16,8 @@ env:
   BASE_ENV_REPO: "RasmusGodske/po-base-environment"
   BASE_ENV_REPO_BRANCH: "main"
 
+  NEW_BRANCH_PREFIK: "auto_update/po-meteringpoint-updated--"
   DOCKER_IMAGE_VERSION_TAG: "V0.1.2"
-  NEW_BRANCH_NAME: "auto_update/po-meteringpoint-updated--${{ env.DOCKER_IMAGE_VERSION_TAG}}"
   
 
 jobs:
@@ -40,10 +40,10 @@ jobs:
           date > generated.txt
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git checkout -b "${{ env.NEW_BRANCH_NAME }}"
+          git checkout -b "${{ env.NEW_BRANCH_NAME }}${{DOCKER_IMAGE_VERSION_TAG}}"
           git add .
           git commit -m "generated"
-          git push origin ${{ env.NEW_BRANCH_NAME }}
+          git push origin ${{ env.NEW_BRANCH_NAME }}${{DOCKER_IMAGE_VERSION_TAG}}
 
       # - name: Get Event payload
       #   id: define_version
