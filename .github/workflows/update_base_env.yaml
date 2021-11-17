@@ -1,8 +1,12 @@
 name: Update base Env
 
 on:
-  repository_dispatch:
-    types: [update_base_env]
+  # TODO: FOR TESTING - DELETE LATER
+  push:
+    branches:
+      - main
+  # repository_dispatch:
+  #   types: [update_base_env]
   # workflow_run:
   #   workflows: ["Create Release"]
   #   types:
@@ -10,7 +14,9 @@ on:
 
 env:
   BASE_ENV_REPO: "RasmusGodske/po-base-environment"
-  BASE_ENV_REPO_BRANCH: "RasmusGodske/po-base-environment"
+  BASE_ENV_REPO_BRANCH: "main"
+
+  DOCKER_IMAGE_VERSION_TAG: "V0.1.2"
 
 jobs:
   build:
@@ -22,13 +28,13 @@ jobs:
           repository: ${{ env.BASE_ENV_REPO }}
           ref: ${{ env.BASE_ENV_REPO_BRANCH }}
 
-      - name: Define version
-        id: define_version
-        run: |
-          echo "ls"
-          echo "${{ github.event.client_payload.docker_image_tag }}"
+      # - name: Define version
+      #   id: define_version
+      #   run: |
+      #     echo "ls"
+      #     echo "${{ github.event.client_payload.docker_image_tag }}"
 
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      # - name: Checkout code
+      #   uses: actions/checkout@v2
+      #   with:
+      #     token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
