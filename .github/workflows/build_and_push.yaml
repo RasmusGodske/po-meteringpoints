@@ -53,6 +53,7 @@ jobs:
             "client_payload": {
                 "caller_repo": "${{ github.server_url }}/${{ github.repository }}",
                 "caller_job_url": "${{ env.JOB_URL }}",
+                "docker_image_url": "${{ steps.meta.outputs.tags[0] }}",
                 "docker_image_tag": "${{ steps.meta.outputs.tag }}"
               }
             }'
