@@ -5,6 +5,7 @@ on:
     types: [released]
 
 env:
+  # Name of the docker image
   DOCKER_IMAGE: godske/test
   
   # Url of the current job
@@ -42,7 +43,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       
-      - name: Directory update request
+      # Trigger 
+      - name: Trigger Update Base Environment Workflow
         run: |
           [ -z "${{ secrets.PERSONAL_ACCESS_TOKEN }}" ] && echo "Skipping, no PERSONAL_ACCESS_TOKEN" && exit 1
           curl --request POST \
@@ -52,7 +54,7 @@ jobs:
           --data '{
             "event_type": "${{ env.UPDATE_BASE_ENV_TRIGGER_EVENT }}",
             "client_payload": {
-                "caller_repo": "${{ github.server_url }}${{ github.repository }}",
+                "caller_repo": "${{ github.server_url }}/${{ github.repository }}",
                 "caller_job_url": "${{ env.JOB_URL }}",
                 "docker_image_tag": "${{ steps.meta.outputs.tags }}",
                 "docker_image_url": "www.hub.docker.com/layers/${{ env.DOCKER_IMAGE }}/${{ steps.meta.outputs.tags }}/images/${{ steps.push.outputs.digest }}"
