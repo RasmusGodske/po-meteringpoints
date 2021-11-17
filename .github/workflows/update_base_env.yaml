@@ -17,6 +17,7 @@ jobs:
         id: define_version
         run: |
           echo "${{ github.event.client_payload.repo }}"
+          echo "${{ github.event.client_payload.docker_image_tag }}"
 
       - name: Checkout code
         uses: actions/checkout@v2
