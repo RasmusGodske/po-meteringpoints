@@ -15,7 +15,7 @@ jobs:
         with:
           ssh-key: ${{ secrets.SSH_KEY }}
         
-
+ 
       - name: Define version
         id: define_version
         run: |
