@@ -17,9 +17,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        # with:
-        #   token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+         
  
       - name: Define version
         id: define_version
