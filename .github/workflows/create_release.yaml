@@ -23,14 +23,22 @@ jobs:
           echo $VERSION_NUMBER
           echo "::set-output name=VERSION_NUMBER::$VERSION_NUMBER"
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          tag_name: ${{steps.define_version.outputs.VERSION_NUMBER}}
-          release_name: Release ${{steps.define_version.outputs.VERSION_NUMBER}}
-          body: ""
-          draft: false
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{steps.define_version.outputs.VERSION_NUMBER}}
           prerelease: false
+          draft: false
+          title: Release ${{steps.define_version.outputs.VERSION_NUMBER}}
+
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      #   with:
+      #     tag_name: ${{steps.define_version.outputs.VERSION_NUMBER}}
+      #     release_name: Release ${{steps.define_version.outputs.VERSION_NUMBER}}
+      #     body: ""
+      #     draft: false
+      #     prerelease: false
