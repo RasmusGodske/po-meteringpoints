@@ -25,49 +25,31 @@ env:
   UPDATE_BASE_ENV_TRIGGER_EVENT: "update_base_env" 
 
 jobs:
-  # build:
-  #   name: Create Release
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-  #       with:
-  #         token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
- 
-  #     - name: Define version
-  #       id: define_version
-  #       run: |
-  #         export MAJOR=0
-  #         export MINOR=0
-  #         export PATCH=${{ github.run_number }}
-  #         export VERSION_NUMBER="V${MAJOR}.${MINOR}.${PATCH}"
-  #         echo $VERSION_NUMBER
-  #         echo "::set-output name=VERSION_NUMBER::$VERSION_NUMBER"
-
-  #     - uses: "marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0"
-  #       with:
-  #         repo_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-  #         automatic_release_tag: ${{steps.define_version.outputs.VERSION_NUMBER}}
-  #         prerelease: false
-  #         draft: false
-  #         title: Release ${{steps.define_version.outputs.VERSION_NUMBER}}
-  
-  trigger-update-base-env:
-    name: Trigger-Update-Base-Env
+  CreateRelease:
+    name: Create Release
     runs-on: ubuntu-latest
     steps:
-      - name: Directory update request
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+ 
+      - name: Define version
+        id: define_version
         run: |
-          [ -z "${{ secrets.PERSONAL_ACCESS_TOKEN }}" ] && echo "Skipping, no PERSONAL_ACCESS_TOKEN" && exit 0
-          curl --request POST \
-          --url https://api.github.com/repos/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}/dispatches \
-          --header 'authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}' \
-          --header 'content-type: application/json' \
-          --data '{
-            "event_type": "${{ env.UPDATE_BASE_ENV_TRIGGER_EVENT }}",
-            "client_payload": {
-                "caller_repo": "${{ github.repository }}",
-                "caller_job_url": "${{ env.JOB_URL }}",
-                "docker_image_tag": "v.1.2.3"
-              }
-            }'
+          export MAJOR=0
+          export MINOR=0
+          export PATCH=${{ github.run_number }}
+          export VERSION_NUMBER="V${MAJOR}.${MINOR}.${PATCH}"
+          echo $VERSION_NUMBER
+          echo "::set-output name=VERSION_NUMBER::$VERSION_NUMBER"
+
+      - uses: "marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0"
+        with:
+          repo_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          automatic_release_tag: ${{steps.define_version.outputs.VERSION_NUMBER}}
+          prerelease: false
+          draft: false
+          title: Release ${{steps.define_version.outputs.VERSION_NUMBER}}
+  
+  

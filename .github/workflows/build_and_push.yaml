@@ -1,0 +1,66 @@
+name: Publish Docker image
+
+on:
+  release:
+    types: [released]
+
+env:
+  DOCKER_IMAGE: godske/test
+  
+  REPO_NAME: ${{ github.event.repository.name }}
+  REPO_OWNER: ${{ github.repository_owner }}
+
+  # Url of the current job
+  JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+  
+  # The event which the update_base_env workflow listens to
+  UPDATE_BASE_ENV_TRIGGER_EVENT: "update_base_env"
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.DOCKER_IMAGE }}
+ 
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  trigger-update-base-env:
+    needs: push_to_registry
+    name: Trigger Base Environment Update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Directory update request
+        run: |
+          [ -z "${{ secrets.PERSONAL_ACCESS_TOKEN }}" ] && echo "Skipping, no PERSONAL_ACCESS_TOKEN" && exit 0
+          curl --request POST \
+          --url https://api.github.com/repos/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}/dispatches \
+          --header 'authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "event_type": "${{ env.UPDATE_BASE_ENV_TRIGGER_EVENT }}",
+            "client_payload": {
+                "caller_repo": "${{ github.repository }}",
+                "caller_job_url": "${{ env.JOB_URL }}",
+                "docker_image_tag": "${{ steps.meta.outputs.tags }}",
+              }
+            }'
