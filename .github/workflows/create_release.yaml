@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: repo name
         run: |
-          echo "${{ REPO_NAME }}"
+          echo "${{ env.REPO_NAME }}"
 
       - name: Directory update request
         run: |
