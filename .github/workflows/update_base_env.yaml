@@ -17,7 +17,7 @@ env:
   BASE_ENV_REPO_BRANCH: "main"
 
   NEW_BRANCH_PREFIK: "auto_update/po-meteringpoint-updated--"
-  DOCKER_IMAGE_VERSION_TAG: "V0.1.2"
+  DOCKER_IMAGE_VERSION_TAG: "V0.1.20"
   
 
 jobs:
@@ -30,11 +30,27 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: ${{ env.BASE_ENV_REPO }}
           ref: ${{ env.BASE_ENV_REPO_BRANCH }}
-          
+      
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
 
-      - name: Define version
-        run: |
-          echo "ls"
+      - name: Update tags
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import yaml
+
+            file = "yggdrasil/applications/ett/ett-meteringpoints.yaml"
+            with open(file) as f:
+                doc = yaml.safe_load(f)
+                print(doc)
+
+                doc['ett-base-helm-chart']['deployments'][0]['image']['tag'] = "${{ env.DOCKER_IMAGE_VERSION_TAG }}"
+                doc['ett-base-helm-chart']['deployments'][1]['image']['tag'] = "${{ env.DOCKER_IMAGE_VERSION_TAG }}"
+
+                with open(file, 'w') as f:
+                    yaml.safe_dump(doc, f)
       
       - run: |
           date > generated.txt
