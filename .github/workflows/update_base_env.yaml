@@ -18,7 +18,7 @@ env:
 
   NEW_BRANCH_PREFIK: "auto_update/po-meteringpoint-updated--"
   DOCKER_IMAGE_VERSION_TAG: "V0.1.20"
-  BUILD_URL: "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+  BUILD_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
   
 
 jobs:
