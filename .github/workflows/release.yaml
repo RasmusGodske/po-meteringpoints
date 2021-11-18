@@ -1,15 +1,17 @@
 name: Create Release V2
 
 env:
-  REPO_NAME: ${{ github.event.repository.name }}
-  REPO_OWNER: ${{ github.repository_owner }}
-  DOCKER_IMAGE: godske/test
-
   # Url of the current job
   JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-  
-  # The event which the update_base_env workflow listens to
-  UPDATE_BASE_ENV_TRIGGER_EVENT: "update_base_env" 
+
+  ## Build and push job
+  DOCKER_IMAGE: godske/test
+
+  ## Update Base Environment job
+  BASE_ENV_REPO: "RasmusGodske/po-base-environment"
+  BASE_ENV_REPO_BRANCH: "main"
+
+  NEW_BRANCH_PREFIX: "auto_update/po-meteringpoint-updated--"
 
 on:
   push:
@@ -67,7 +69,7 @@ jobs:
         with:
           images: ${{ env.DOCKER_IMAGE }}
           tags: |
-            type=semver,pattern={{version}},value=v0.0.88
+            type=semver,pattern={{version}},value=${{ needs.CreateRelease.outputs.release_tag }}
  
       - name: Build and push Docker image
         id: push
@@ -77,3 +79,61 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  update_base_env:
+    name: Update Base Environment
+    runs-on: ubuntu-latest
+    needs: 
+      - CreateRelease
+      - push_to_registry
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: ${{ env.BASE_ENV_REPO }}
+          ref: ${{ env.BASE_ENV_REPO_BRANCH }}
+
+      - uses: actions/setup-python@v2
+
+      - name: install yaml
+        run: python -m pip install pyyaml
+ 
+      - name: Update Helm Chart Tags
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import yaml
+
+            file = "yggdrasil/applications/ett/ett-meteringpoints.yaml"
+            with open(file) as f:
+                doc = yaml.safe_load(f)
+                print(doc)
+
+                doc['ett-base-helm-chart']['deployments'][0]['image']['tag'] = "${{ needs.CreateRelease.outputs.release_tag }}"
+                doc['ett-base-helm-chart']['deployments'][1]['image']['tag'] = "${{ needs.CreateRelease.outputs.release_tag }}"
+
+                with open(file, 'w') as f:
+                    yaml.safe_dump(doc, f)
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          commit-message: Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}
+          committer: GitHub <noreply@github.com>
+          branch: "${{ env.NEW_BRANCH_PREFIX }}${{ needs.CreateRelease.outputs.release_tag }}"
+          body: |
+            Bump MeteringPoint Service to [${{ needs.CreateRelease.outputs.release_tag }}][1]
+            
+            - Triggered by [Job][2]
+              - Triggered by: [Repo][3]
+
+            [1]: ${{ env.DOCKER_IMAGE_URL }}
+            [2]: ${{ env.JOB_URL }}
+            [3]: ${{ github.server_url }}/${{ github.repository }}
