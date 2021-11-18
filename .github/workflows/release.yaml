@@ -15,9 +15,14 @@ env:
   SERVICE_NAME: meteringpoints
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  workflow_run:
+    workflows: ["Lint and Test"]
+    branches: [main]
+    types:
+      - completed
 
 jobs:
   create_release:
