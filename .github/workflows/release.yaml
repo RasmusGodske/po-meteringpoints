@@ -53,6 +53,8 @@ jobs:
     name: Push Docker image to Docker Hub
     needs: CreateRelease
     runs-on: ubuntu-latest
+    outputs:
+      docker_image_digest: ${{ steps.push.outputs.digest }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -135,6 +137,6 @@ jobs:
             - Triggered by [Job][2]
               - Triggered by: [Repo][3]
 
-            [1]: https://www.hub.docker.com/layers/${{ env.DOCKER_IMAGE }}/${{ needs.CreateRelease.outputs.release_tag }}/images/${{ steps.push.outputs.digest }}
+            [1]: https://www.hub.docker.com/layers/${{ env.DOCKER_IMAGE }}/${{ needs.CreateRelease.outputs.release_tag }}/images/${{ needs.push_to_registry.outputs.docker_image_digest }}
             [2]: ${{ env.JOB_URL }}
             [3]: ${{ github.server_url }}/${{ github.repository }}
