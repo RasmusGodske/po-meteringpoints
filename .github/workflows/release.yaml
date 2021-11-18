@@ -70,6 +70,8 @@ jobs:
           images: ${{ env.DOCKER_IMAGE }}
           tags: |
             type=semver,pattern={{version}},value=${{ needs.CreateRelease.outputs.release_tag }}
+
+      - run: echo ${{ steps.meta.outputs.tags }}
  
       - name: Build and push Docker image
         id: push
@@ -130,7 +132,7 @@ jobs:
           branch: "${{ env.NEW_BRANCH_PREFIX }}${{ needs.CreateRelease.outputs.release_tag }}"
           body: |
             Bump MeteringPoint Service to [${{ needs.CreateRelease.outputs.release_tag }}][1]
-            
+
             - Triggered by [Job][2]
               - Triggered by: [Repo][3]
 
