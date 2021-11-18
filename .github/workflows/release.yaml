@@ -125,7 +125,8 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          commit-message: "Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}"
+          title: Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}
+          commit-message: Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}
           committer: GitHub <noreply@github.com>
           branch: "${{ env.NEW_BRANCH_PREFIX }}${{ needs.CreateRelease.outputs.release_tag }}"
           body: |
