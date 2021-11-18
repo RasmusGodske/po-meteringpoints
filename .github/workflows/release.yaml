@@ -37,7 +37,7 @@ jobs:
           export MAJOR=0
           export MINOR=0
           export PATCH=${{ github.run_number }}
-          export VERSION_NUMBER="V${MAJOR}.${MINOR}.${PATCH}"
+          export VERSION_NUMBER="v${MAJOR}.${MINOR}.${PATCH}"
           echo $VERSION_NUMBER
           echo "::set-output name=VERSION_NUMBER::$VERSION_NUMBER"
 
