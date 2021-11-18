@@ -1,14 +1,31 @@
+# This Workflow does the following:
+# 1. Create new Github Release
+# 2. Build and Push Docker image to Dockerhub
+# 3. Update Base Environment Repository
+#   3.1 Replace old image tag with new one
+#   3.2 Make new branch with commited chnages
+#   3.3 Make pull request in the production branch
+
+
 name: Create Release
 
 env:
   # Url of the current job
   JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-  ## Build and push job
-  DOCKER_IMAGE: godske/test
+  
+  ##### push_to_registry #####
 
-  ## Update Base Environment job
+  # Name of the docker image found on docker hub
+  DOCKER_IMAGE: godske/test 
+
+
+  ##### update_base_env #####
+  
+  # Base environment path "{OWNER}/{REPO_NAME}"
   BASE_ENV_REPO: "RasmusGodske/po-base-environment"
+  
+  # Branch to make pull request to
   BASE_ENV_REPO_BRANCH: "main"
 
   # The name of the service being updated and shown in pull request
