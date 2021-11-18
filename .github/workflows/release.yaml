@@ -132,11 +132,9 @@ jobs:
           committer: GitHub <noreply@github.com>
           branch: "${{ env.NEW_BRANCH_PREFIX }}${{ needs.CreateRelease.outputs.release_tag }}"
           body: |
-            Bump MeteringPoint Service to [${{ needs.CreateRelease.outputs.release_tag }}][1]
+            Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}
+ 
+            - Triggered by [Job][1] [Repo][2]
 
-            - Triggered by [Job][2]
-              - Triggered by: [Repo][3]
-
-            [1]: https://www.hub.docker.com/layers/${{ env.DOCKER_IMAGE }}/${{ needs.CreateRelease.outputs.release_tag }}/images/${{ needs.push_to_registry.outputs.docker_image_digest }}
-            [2]: ${{ env.JOB_URL }} 
-            [3]: ${{ github.server_url }}/${{ github.repository }}
+            [1]: ${{ env.JOB_URL }} 
+            [2]: ${{ github.server_url }}/${{ github.repository }}
