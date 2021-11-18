@@ -69,7 +69,7 @@ jobs:
         with:
           images: ${{ env.DOCKER_IMAGE }}
           tags: |
-            type=semver,pattern={{version}},value=${{ needs.CreateRelease.outputs.release_tag }}
+            type=semver,pattern={{raw}},value=${{ needs.CreateRelease.outputs.release_tag }}
 
       - run: |
           echo ${{ needs.CreateRelease.outputs.release_tag }}
