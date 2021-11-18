@@ -12,9 +12,7 @@ env:
   BASE_ENV_REPO_BRANCH: "main"
 
   # The name of the service being updated and shown in pull request
-  SERVICE_NAME: Meteringpoints
-
-  NEW_BRANCH_PREFIX: "auto_update/po-meteringpoint-updated--"
+  SERVICE_NAME: meteringpoints
 
 on:
   push:
@@ -133,7 +131,7 @@ jobs:
           title: Bump ${{ env.SERVICE_NAME }} to ${{ needs.create_release.outputs.release_tag }}
           commit-message: Bump ${{ env.SERVICE_NAME }} to ${{ needs.create_release.outputs.release_tag }}
           committer: GitHub <noreply@github.com>
-          branch: "${{ env.NEW_BRANCH_PREFIX }}${{ needs.create_release.outputs.release_tag }}"
+          branch: "automated/github_actions/bump-${{ env.SERVICE_NAME }}-version-${{ needs.create_release.outputs.release_tag }}"
           body: |
             Bump ${{ env.SERVICE_NAME }} to ${{ needs.create_release.outputs.release_tag }}
  
