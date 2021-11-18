@@ -71,9 +71,9 @@ jobs:
           tags: |
             type=semver,pattern=v{{version}},value=${{ needs.CreateRelease.outputs.release_tag }}
 
-      - run: |
-          echo ${{ needs.CreateRelease.outputs.release_tag }}
-          echo ${{ steps.meta.outputs.tags }}
+      # - run: |
+      #     echo ${{ needs.CreateRelease.outputs.release_tag }}
+      #     echo ${{ steps.meta.outputs.tags }}
  
       - name: Build and push Docker image
         id: push
