@@ -71,10 +71,6 @@ jobs:
           tags: |
             type=semver,pattern=v{{version}},value=${{ needs.CreateRelease.outputs.release_tag }}
 
-      # - run: |
-      #     echo ${{ needs.CreateRelease.outputs.release_tag }}
-      #     echo ${{ steps.meta.outputs.tags }}
- 
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -129,7 +125,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          commit-message: Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}
+          commit-message: "Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}"
           committer: GitHub <noreply@github.com>
           branch: "${{ env.NEW_BRANCH_PREFIX }}${{ needs.CreateRelease.outputs.release_tag }}"
           body: |
@@ -138,6 +134,6 @@ jobs:
             - Triggered by [Job][2]
               - Triggered by: [Repo][3]
 
-            [1]: ${{ env.DOCKER_IMAGE_URL }}
+            [1]: www.hub.docker.com/layers/${{ env.DOCKER_IMAGE }}/${{ needs.CreateRelease.outputs.release_tag }}/images/${{ steps.push.outputs.digest }}
             [2]: ${{ env.JOB_URL }}
             [3]: ${{ github.server_url }}/${{ github.repository }}
