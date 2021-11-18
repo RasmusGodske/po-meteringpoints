@@ -11,6 +11,9 @@ env:
   BASE_ENV_REPO: "RasmusGodske/po-base-environment"
   BASE_ENV_REPO_BRANCH: "main"
 
+  # The name of the service being updated and shown in pull request
+  SERVICE_NAME: Meteringpoints
+
   NEW_BRANCH_PREFIX: "auto_update/po-meteringpoint-updated--"
 
 on:
@@ -127,12 +130,12 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          title: Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}
-          commit-message: Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}
+          title: Bump ${{ env.SERVICE_NAME }} to ${{ needs.CreateRelease.outputs.release_tag }}
+          commit-message: Bump ${{ env.SERVICE_NAME }} to ${{ needs.CreateRelease.outputs.release_tag }}
           committer: GitHub <noreply@github.com>
           branch: "${{ env.NEW_BRANCH_PREFIX }}${{ needs.CreateRelease.outputs.release_tag }}"
           body: |
-            Bump MeteringPoint Service to ${{ needs.CreateRelease.outputs.release_tag }}
+            Bump ${{ env.SERVICE_NAME }} to ${{ needs.CreateRelease.outputs.release_tag }}
  
             - Triggered by [Job][1] [Repo][2]
 
