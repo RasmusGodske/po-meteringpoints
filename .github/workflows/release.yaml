@@ -138,5 +138,5 @@ jobs:
               - Triggered by: [Repo][3]
 
             [1]: https://www.hub.docker.com/layers/${{ env.DOCKER_IMAGE }}/${{ needs.CreateRelease.outputs.release_tag }}/images/${{ needs.push_to_registry.outputs.docker_image_digest }}
-            [2]: ${{ env.JOB_URL }}
+            [2]: ${{ env.JOB_URL }} 
             [3]: ${{ github.server_url }}/${{ github.repository }}
